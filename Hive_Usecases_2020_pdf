@@ -1,0 +1,1925 @@
+--Hive Usecase-2020
+
+Hive Usecases 2020
+Lets learn about schema migration, Csv serde, json, fixed width , sqoop
+export/import with more options, if we know how to work on these we
+can boldly say I am one among very few know these advance concepts
+
+1. Create a usecase dir
+mkdir /home/hduser/hiveusecase
+Download from the link "inceptez.in -> more -> HIVE REALTIME USECASES FOR INTERVIEW
+PREPARATION -> Click here to download the data files for the usecases given below" the
+custpayments_ORIG.sql and payments.txt into /home/hduser/hiveusecase
+2. Ensure Hadoop, MYSQL, Hive remote metastore is running.
+Usecase 1:
+**********
+1. Login to Mysql and execute the sql file to load the custpayments table:
+source /home/hduser/hiveusecase/custpayments_ORIG.sql
+
+mysql> source /home/hduser/hiveusecase/custpayments_ORIG.sql;
+Query OK, 0 rows affected (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+Query OK, 1 row affected, 1 warning (0.00 sec)
+
+Database changed
+Query OK, 0 rows affected (0.05 sec)
+
+Query OK, 0 rows affected (0.03 sec)
+
+Query OK, 122 rows affected (0.01 sec)
+Records: 122  Duplicates: 0  Warnings: 0
+
+mysql> 
+
+2. Write sqoop command to import data from customerpayments table with 2 mappers, with enclosed by " (As we have ',' in the data itself we are importing in sqoop using --enclosed-by option into the location /user/hduser/custpayments).
+
+sqoop import --connect jdbc:mysql://localhost/custpayments --username root --password root --table customers -m 2  \
+--target-dir  /user/hduser/custpayments --delete-target-dir  --fields-terminated-by ',' --enclosed-by '\"';
+
+
+[hduser@Inceptez ~]$ sqoop import --connect jdbc:mysql://localhost/custpayments --username root --password root --table customers -m 2  \
+> --target-dir  /user/hduser/custpayments --delete-target-dir  --fields-terminated-by ',' --enclosed-by '\"';
+Warning: /usr/local/hbase does not exist! HBase imports will fail.
+Please set $HBASE_HOME to the root of your HBase installation.
+Warning: /usr/local/sqoop/../hcatalog does not exist! HCatalog jobs will fail.
+Please set $HCAT_HOME to the root of your HCatalog installation.
+Warning: /usr/local/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+Warning: /usr/local/sqoop/../zookeeper does not exist! Accumulo imports will fail.
+Please set $ZOOKEEPER_HOME to the root of your Zookeeper installation.
+20/10/19 19:42:02 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6
+20/10/19 19:42:02 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+20/10/19 19:42:02 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+20/10/19 19:42:02 INFO tool.CodeGenTool: Beginning code generation
+20/10/19 19:42:04 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `customers` AS t LIMIT 1
+20/10/19 19:42:04 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `customers` AS t LIMIT 1
+20/10/19 19:42:04 INFO orm.CompilationManager: HADOOP_MAPRED_HOME is /usr/local/hadoop
+Note: /tmp/sqoop-hduser/compile/7ee78d06a245b03e3ebc084805eeb1dc/customers.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+20/10/19 19:42:13 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-hduser/compile/7ee78d06a245b03e3ebc084805eeb1dc/customers.jar
+20/10/19 19:42:13 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+20/10/19 19:42:15 INFO tool.ImportTool: Destination directory /user/hduser/custpayments deleted.
+20/10/19 19:42:15 WARN manager.MySQLManager: It looks like you are importing from mysql.
+20/10/19 19:42:15 WARN manager.MySQLManager: This transfer can be faster! Use the --direct
+20/10/19 19:42:15 WARN manager.MySQLManager: option to exercise a MySQL-specific fast path.
+20/10/19 19:42:15 INFO manager.MySQLManager: Setting zero DATETIME behavior to convertToNull (mysql)
+20/10/19 19:42:15 INFO mapreduce.ImportJobBase: Beginning import of customers
+20/10/19 19:42:15 INFO Configuration.deprecation: mapred.jar is deprecated. Instead, use mapreduce.job.jar
+20/10/19 19:42:15 INFO Configuration.deprecation: mapred.map.tasks is deprecated. Instead, use mapreduce.job.maps
+20/10/19 19:42:15 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
+20/10/19 19:42:21 INFO db.DBInputFormat: Using read commited transaction isolation
+20/10/19 19:42:21 INFO db.DataDrivenDBInputFormat: BoundingValsQuery: SELECT MIN(`customerNumber`), MAX(`customerNumber`) FROM `customers`
+20/10/19 19:42:21 INFO mapreduce.JobSubmitter: number of splits:2
+20/10/19 19:42:21 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1602787237899_0019
+20/10/19 19:42:22 INFO impl.YarnClientImpl: Submitted application application_1602787237899_0019
+20/10/19 19:42:22 INFO mapreduce.Job: The url to track the job: http://Inceptez:8088/proxy/application_1602787237899_0019/
+20/10/19 19:42:22 INFO mapreduce.Job: Running job: job_1602787237899_0019
+20/10/19 19:42:39 INFO mapreduce.Job: Job job_1602787237899_0019 running in uber mode : false
+20/10/19 19:42:39 INFO mapreduce.Job:  map 0% reduce 0%
+20/10/19 19:42:50 INFO mapreduce.Job:  map 100% reduce 0%
+20/10/19 19:42:51 INFO mapreduce.Job: Job job_1602787237899_0019 completed successfully
+20/10/19 19:42:51 INFO mapreduce.Job: Counters: 30
+	File System Counters
+		FILE: Number of bytes read=0
+		FILE: Number of bytes written=267550
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+		HDFS: Number of bytes read=253
+		HDFS: Number of bytes written=17553
+		HDFS: Number of read operations=8
+		HDFS: Number of large read operations=0
+		HDFS: Number of write operations=4
+	Job Counters 
+		Launched map tasks=2
+		Other local map tasks=2
+		Total time spent by all maps in occupied slots (ms)=17805
+		Total time spent by all reduces in occupied slots (ms)=0
+		Total time spent by all map tasks (ms)=17805
+		Total vcore-seconds taken by all map tasks=17805
+		Total megabyte-seconds taken by all map tasks=18232320
+	Map-Reduce Framework
+		Map input records=122
+		Map output records=122
+		Input split bytes=253
+		Spilled Records=0
+		Failed Shuffles=0
+		Merged Map outputs=0
+		GC time elapsed (ms)=678
+		CPU time spent (ms)=3010
+		Physical memory (bytes) snapshot=344084480
+		Virtual memory (bytes) snapshot=4170309632
+		Total committed heap usage (bytes)=217579520
+	File Input Format Counters 
+		Bytes Read=0
+	File Output Format Counters 
+		Bytes Written=17553
+20/10/19 19:42:51 INFO mapreduce.ImportJobBase: Transferred 17.1416 KB in 36.5316 seconds (480.4877 bytes/sec)
+20/10/19 19:42:51 INFO mapreduce.ImportJobBase: Retrieved 122 records.
+[hduser@Inceptez ~]$
+
+[hduser@Inceptez ~]$ hadoop fs -ls /user/hduser/custpayments
+20/10/19 19:48:41 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 3 items
+-rw-r--r--   1 hduser hadoop          0 2020-10-19 19:42 /user/hduser/custpayments/_SUCCESS
+-rw-r--r--   1 hduser hadoop       8962 2020-10-19 19:42 /user/hduser/custpayments/part-m-00000
+-rw-r--r--   1 hduser hadoop       8591 2020-10-19 19:42 /user/hduser/custpayments/part-m-00001
+[hduser@Inceptez ~]$ hadoop fs -cat /user/hduser/custpayments/* | head -10
+20/10/19 19:49:02 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+"103","Atelier graphique","Schmitt","Carine ","40.32.2555","54, rue Royale","null","Nantes","null","44000","France","1370","21000.00"
+"112","Signal Gift Stores","King","Jean","7025551838","8489 Strong St.","null","Las Vegas","NV","83030","USA","1166","71800.00"
+"114","Australian Collectors, Co.","Ferguson","Peter","03 9520 4555","636 St Kilda Road","Level 3","Melbourne","Victoria","3004","Australia","1611","117300.00"
+"119","La Rochelle Gifts","Labrune","Janine ","40.67.8555","67, rue des Cinquante Otages","null","Nantes","null","44000","France","1370","118200.00"
+"121","Baane Mini Imports","Bergulfsen","Jonas ","07-98 9555","Erling Skakkes gate 78","null","Stavern","null","4110","Norway","1504","81700.00"
+"124","Mini Gifts Distributors Ltd.","Nelson","Susan","4155551450","5677 Strong St.","null","San Rafael","CA","97562","USA","1165","210500.00"
+"125","Havel & Zbyszek Co","Piestrzeniewicz","Zbyszek ","(26) 642-7555","ul. Filtrowa 68","null","Warszawa","null","01-012","Poland","null","0.00"
+"128","Blauer See Auto, Co.","Keitel","Roland","+49 69 66 90 2555","Lyonerstr. 34","null","Frankfurt","null","60528","Germany","1504","59700.00"
+"129","Mini Wheels Co.","Murphy","Julie","6505555787","5557 North Pendale Street","null","San Francisco","CA","94217","USA","1165","64600.00"
+"131","Land of Toys Inc.","Lee","Kwai","2125557818","897 Long Airport Avenue","null","NYC","NY","10022","USA","1323","114900.00"
+cat: Unable to write to output stream.
+cat: Unable to write to output stream.
+[hduser@Inceptez ~]$
+
+3. Create a hive external table and load the sqoop imported data to the hive table called custpayments.
+As we have ',' in the data itself we are using quotedchar option below with the csv serde option as given
+below as example, create the table with all columns.
+
+create external table custmaster_csvserde (customerNumber int,customername string,contactlastname string,contactfirstname string)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+"separatorChar" = ",",
+"quotechar"= "\"")
+LOCATION '/user/hduser/custpayments/';
+
+hive (custdb)> create external table custmaster_csvserde (customerNumber int,customername string,contactlastname string,contactfirstname string)
+             > ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+             > WITH SERDEPROPERTIES (
+             > "separatorChar" = ",",
+             > "quotechar"= "\"")
+             > LOCATION '/user/hduser/custpayments/';
+OK
+Time taken: 0.15 seconds
+hive (custdb)> select * from custmaster_csvserde limit 5;
+OK
+custmaster_csvserde.customernumber	custmaster_csvserde.customername	custmaster_csvserde.contactlastname	custmaster_csvserde.contactfirstname
+103	Atelier graphique	Schmitt	Carine 
+112	Signal Gift Stores	King	Jean
+114	Australian Collectors, Co.	Ferguson	Peter
+119	La Rochelle Gifts	Labrune	Janine 
+121	Baane Mini Imports	Bergulfsen	Jonas 
+Time taken: 0.093 seconds, Fetched: 5 row(s)
+hive (custdb)>
+
+
+4. Copy the payments.txt into hdfs location /user/hduser/paymentsdata/ and Create an external table
+namely payments with customernumber, checknumber, paymentdate, amount columns to point the
+imported payments data.
+
+create external table payments (customernumber int, checknumber string, paymentdate date, amount double)
+row format delimited fields terminated by ','
+location '/user/hduser/paymentsdata/';
+
+
+hive (custdb)> create external table payments (customernumber int, checknumber string, paymentdate date, amount double)
+             > row format delimited fields terminated by ','
+             > location '/user/hduser/paymentsdata/';
+OK
+Time taken: 0.12 seconds
+hive (custdb)> select * from payments limit 3;
+OK
+payments.custno	payments.chequeno	payments.trndt	payments.amount
+103	HQ336336	2016-10-19	6066.78
+103	JM555205	2016-10-05	14571.44
+103	OM314933	2016-10-18	1676.14
+Time taken: 0.084 seconds, Fetched: 3 row(s)
+hive (custdb)>
+
+
+5. Create an external table called cust_payments in avro format and load data by doing inner join of
+custmaster and payments tables, using insert select customernumber,
+contactfirstname,contactlastname,phone, creditlimit from custmaster and paymentdate, amount
+columns from payments table
+
+mysql> use custpayments;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> show tables;
++------------------------+
+| Tables_in_custpayments |
++------------------------+
+| customers              |
++------------------------+
+1 row in set (0.00 sec)
+
+mysql> select * from customers where customerNumber=103;
++----------------+-------------------+-----------------+------------------+------------+----------------+--------------+--------+-------+------------+---------+------------------------+-------------+
+| customerNumber | customerName      | contactLastName | contactFirstName | phone      | addressLine1   | addressLine2 | city   | state | postalCode | country | salesRepEmployeeNumber | creditLimit |
++----------------+-------------------+-----------------+------------------+------------+----------------+--------------+--------+-------+------------+---------+------------------------+-------------+
+|            103 | Atelier graphique | Schmitt         | Carine           | 40.32.2555 | 54, rue Royale | NULL         | Nantes | NULL  | 44000      | France  |                   1370 |    21000.00 |
++----------------+-------------------+-----------------+------------------+------------+----------------+--------------+--------+-------+------------+---------+------------------------+-------------+
+1 row in set (0.00 sec)
+
+mysql>
+
+--- Import data from mysql to hdfs
+sqoop import --connect jdbc:mysql://localhost/custpayments --username root --password root --table customers -m 2 --split-by customerNumber --target-dir /user/hduser/customerdata/ --delete-target-dir --enclosed-by '\"';
+
+[hduser@Inceptez hiveusecase]$ sqoop import --connect jdbc:mysql://localhost/custpayments --username root --password root --table customers -m 1 --split-by customerNumber --target-dir /user/hduser/customerdata/ --delete-target-dir --enclosed-by '\"';
+Warning: /usr/local/hbase does not exist! HBase imports will fail.
+Please set $HBASE_HOME to the root of your HBase installation.
+Warning: /usr/local/sqoop/../hcatalog does not exist! HCatalog jobs will fail.
+Please set $HCAT_HOME to the root of your HCatalog installation.
+Warning: /usr/local/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+Warning: /usr/local/sqoop/../zookeeper does not exist! Accumulo imports will fail.
+Please set $ZOOKEEPER_HOME to the root of your Zookeeper installation.
+20/10/21 19:13:39 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6
+20/10/21 19:13:39 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+20/10/21 19:13:40 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+20/10/21 19:13:40 INFO tool.CodeGenTool: Beginning code generation
+20/10/21 19:13:40 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `customers` AS t LIMIT 1
+20/10/21 19:13:41 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `customers` AS t LIMIT 1
+20/10/21 19:13:41 INFO orm.CompilationManager: HADOOP_MAPRED_HOME is /usr/local/hadoop
+Note: /tmp/sqoop-hduser/compile/b2bb47ff4b2396fdcde5a41e72ca4119/customers.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+20/10/21 19:13:48 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-hduser/compile/b2bb47ff4b2396fdcde5a41e72ca4119/customers.jar
+20/10/21 19:13:49 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+20/10/21 19:13:50 INFO tool.ImportTool: Destination directory /user/hduser/customerdata is not present, hence not deleting.
+20/10/21 19:13:50 WARN manager.MySQLManager: It looks like you are importing from mysql.
+20/10/21 19:13:50 WARN manager.MySQLManager: This transfer can be faster! Use the --direct
+20/10/21 19:13:50 WARN manager.MySQLManager: option to exercise a MySQL-specific fast path.
+20/10/21 19:13:50 INFO manager.MySQLManager: Setting zero DATETIME behavior to convertToNull (mysql)
+20/10/21 19:13:50 INFO mapreduce.ImportJobBase: Beginning import of customers
+20/10/21 19:13:50 INFO Configuration.deprecation: mapred.jar is deprecated. Instead, use mapreduce.job.jar
+20/10/21 19:13:50 INFO Configuration.deprecation: mapred.map.tasks is deprecated. Instead, use mapreduce.job.maps
+20/10/21 19:13:50 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
+20/10/21 19:14:00 INFO db.DBInputFormat: Using read commited transaction isolation
+20/10/21 19:14:00 INFO mapreduce.JobSubmitter: number of splits:1
+20/10/21 19:14:00 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1602787237899_0022
+20/10/21 19:14:00 INFO impl.YarnClientImpl: Submitted application application_1602787237899_0022
+20/10/21 19:14:00 INFO mapreduce.Job: The url to track the job: http://Inceptez:8088/proxy/application_1602787237899_0022/
+20/10/21 19:14:00 INFO mapreduce.Job: Running job: job_1602787237899_0022
+20/10/21 19:15:03 INFO mapreduce.Job: Job job_1602787237899_0022 running in uber mode : false
+20/10/21 19:15:03 INFO mapreduce.Job:  map 0% reduce 0%
+20/10/21 19:15:39 INFO mapreduce.Job:  map 100% reduce 0%
+20/10/21 19:15:40 INFO mapreduce.Job: Job job_1602787237899_0022 completed successfully
+20/10/21 19:15:40 INFO mapreduce.Job: Counters: 30
+	File System Counters
+		FILE: Number of bytes read=0
+		FILE: Number of bytes written=133775
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+		HDFS: Number of bytes read=87
+		HDFS: Number of bytes written=17553
+		HDFS: Number of read operations=4
+		HDFS: Number of large read operations=0
+		HDFS: Number of write operations=2
+	Job Counters 
+		Launched map tasks=1
+		Other local map tasks=1
+		Total time spent by all maps in occupied slots (ms)=31909
+		Total time spent by all reduces in occupied slots (ms)=0
+		Total time spent by all map tasks (ms)=31909
+		Total vcore-seconds taken by all map tasks=31909
+		Total megabyte-seconds taken by all map tasks=32674816
+	Map-Reduce Framework
+		Map input records=122
+		Map output records=122
+		Input split bytes=87
+		Spilled Records=0
+		Failed Shuffles=0
+		Merged Map outputs=0
+		GC time elapsed (ms)=4566
+		CPU time spent (ms)=2360
+		Physical memory (bytes) snapshot=170135552
+		Virtual memory (bytes) snapshot=2086416384
+		Total committed heap usage (bytes)=109576192
+	File Input Format Counters 
+		Bytes Read=0
+	File Output Format Counters 
+		Bytes Written=17553
+20/10/21 19:15:40 INFO mapreduce.ImportJobBase: Transferred 17.1416 KB in 110.0735 seconds (159.4662 bytes/sec)
+20/10/21 19:15:40 INFO mapreduce.ImportJobBase: Retrieved 122 records.
+[hduser@Inceptez hiveusecase]$ hdfs dfs -ls /user/hduser/customerdata/
+20/10/21 19:16:22 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 2 items
+-rw-r--r--   1 hduser hadoop          0 2020-10-21 19:15 /user/hduser/customerdata/_SUCCESS
+-rw-r--r--   1 hduser hadoop      17553 2020-10-21 19:15 /user/hduser/customerdata/part-m-00000
+[hduser@Inceptez hiveusecase]$ hdfs dfs -cat /user/hduser/customerdata/part-m-00000 | head -3
+20/10/21 19:17:04 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+"103","Atelier graphique","Schmitt","Carine ","40.32.2555","54, rue Royale","null","Nantes","null","44000","France","1370","21000.00"
+"112","Signal Gift Stores","King","Jean","7025551838","8489 Strong St.","null","Las Vegas","NV","83030","USA","1166","71800.00"
+"114","Australian Collectors, Co.","Ferguson","Peter","03 9520 4555","636 St Kilda Road","Level 3","Melbourne","Victoria","3004","Australia","1611","117300.00"
+cat: Unable to write to output stream.
+[hduser@Inceptez hiveusecase]$ 
+
+
+create external table customers(customerNumber int, customerName string, contactLastname string, contactFirstname string, phone string, address1 string, address2 string, city string, state string, postalcode string, country string, salesRepEmployeeNumber int, creditlimit decimal)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+ "separatorChar" = ",",
+ "quoteChar" = "\"") 
+location '/user/hduser/customerdata/';
+
+hive (custdb)> create external table customers(customerNumber int, customerName string, contactLastname string, contactFirstname string, phone string, address1 string, address2 string, city string, state string, postalcode string, country string, salesRepEmployeeNumber int, creditlimit decimal)
+             > ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+             > WITH SERDEPROPERTIES (
+             >  "separatorChar" = ",",
+             >  "quoteChar" = "\"") 
+             > location '/user/hduser/customerdata/';
+OK
+Time taken: 0.147 seconds
+hive (custdb)> select * from customers limit 3;
+OK
+customers.customernumber	customers.customername	customers.contactlastname	customers.contactfirstname	customers.phone	customers.address1	customers.address2	customers.city	customers.state	customers.postalcode	customers.country	customers.salesrepemployeenumber	customers.creditlimit
+103	Atelier graphique	Schmitt	Carine 	40.32.2555	54, rue Royale	null	Nantes	null	44000	France	1370	21000.00
+112	Signal Gift Stores	King	Jean	7025551838	8489 Strong St.	null	Las Vegas	NV	83030	USA	1166	71800.00
+114	Australian Collectors, Co.	Ferguson	Peter	03 9520 4555	636 St Kilda Road	Level 3	Melbourne	Victoria	3004	Australia	1611	117300.00
+Time taken: 0.054 seconds, Fetched: 3 row(s)
+hive (custdb)> 
+
+--Create target table cust_payments
+
+create external table cust_payments(customernumber int,contactfirstname string,contactlastname string,phone string, creditlimit decimal, paymentdate date,amount double)
+row format delimited fields terminated by ","
+stored as avro;
+
+hive (custdb)> create external table cust_payments(customernumber int,contactfirstname string,contactlastname string,phone string, creditlimit decimal, paymentdate date,amount double)
+             > row format delimited fields terminated by ","
+             > stored as avro;
+OK
+Time taken: 0.334 seconds
+hive (custdb)>
+
+[hduser@Inceptez ~]$ hadoop fs -ls /user/hive/warehouse/custdb.db/cust_payments
+20/10/21 19:38:33 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[hduser@Inceptez ~]$ 
+
+
+--insert customer payments records into cust_payments tables using insert select statement
+
+insert into cust_payments
+select c.customernumber, c.contactfirstname, c.contactlastname, c.phone, c.creditlimit, p.trndt, p.amount 
+  from customers c inner join payments p 
+    on c.customernumber = p.custno;
+
+hive (custdb)> insert into cust_payments
+             > select c.customernumber, c.contactfirstname, c.contactlastname, c.phone, c.creditlimit, p.trndt, p.amount 
+             >   from customers c inner join payments p 
+             >     on c.customernumber = p.custno;
+Query ID = hduser_20201021194455_a6310f6d-2949-4eab-abb0-066c12fafa94
+Total jobs = 1
+20/10/21 19:44:59 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+20/10/21 19:45:00 WARN conf.HiveConf: HiveConf of name hive.mapjoin.optimized.keys does not exist
+20/10/21 19:45:00 WARN conf.HiveConf: HiveConf of name hive.optimize.multigroupby.common.distincts does not exist
+20/10/21 19:45:00 WARN conf.HiveConf: HiveConf of name hive.mapjoin.lazy.hashtable does not exist
+20/10/21 19:45:00 WARN conf.HiveConf: HiveConf of name hive.server2.thrift.http.min.worker.threads does not exist
+20/10/21 19:45:00 WARN conf.HiveConf: HiveConf of name hive.server2.thrift.http.max.worker.threads does not exist
+20/10/21 19:45:00 WARN conf.HiveConf: HiveConf of name hive.server2.logging.operation.verbose does not exist
+Execution log at: /tmp/hduser/hduser_20201021194455_a6310f6d-2949-4eab-abb0-066c12fafa94.log
+2020-10-21 19:45:01	Starting to launch local task to process map join;	maximum memory = 477626368
+2020-10-21 19:45:02	Dump the side-table for tag: 1 with group count: 98 into file: file:/tmp/hivelog/277bfff9-fc90-47b7-8a6a-cbff6a8ff9f3/hive_2020-10-21_19-44-55_051_6654271096933229898-1/-local-10001/HashTable-Stage-4/MapJoin-mapfile21--.hashtable
+2020-10-21 19:45:02	Uploaded 1 File to: file:/tmp/hivelog/277bfff9-fc90-47b7-8a6a-cbff6a8ff9f3/hive_2020-10-21_19-44-55_051_6654271096933229898-1/-local-10001/HashTable-Stage-4/MapJoin-mapfile21--.hashtable (6719 bytes)
+2020-10-21 19:45:02	End of local task; Time Taken: 1.897 sec.
+Execution completed successfully
+MapredLocal task succeeded
+Launching Job 1 out of 1
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1602787237899_0025, Tracking URL = http://Inceptez:8088/proxy/application_1602787237899_0025/
+Kill Command = /usr/local/hadoop/bin/hadoop job  -kill job_1602787237899_0025
+Hadoop job information for Stage-4: number of mappers: 1; number of reducers: 0
+2020-10-21 19:45:14,422 Stage-4 map = 0%,  reduce = 0%
+2020-10-21 19:45:20,856 Stage-4 map = 100%,  reduce = 0%, Cumulative CPU 3.47 sec
+MapReduce Total cumulative CPU time: 3 seconds 470 msec
+Ended Job = job_1602787237899_0025
+Loading data to table custdb.cust_payments
+[Error 30017]: Skipping stats aggregation by error org.apache.hadoop.hive.ql.metadata.HiveException: [Error 30001]: StatsPublisher cannot be initialized. There was a error in the initialization of StatsPublisher, and retrying might help. If you dont want the query to fail because accurate statistics could not be collected, set hive.stats.reliable=false
+Table custdb.cust_payments stats: [numFiles=1, numRows=-1, totalSize=14622, rawDataSize=-1]
+MapReduce Jobs Launched: 
+Stage-Stage-4: Map: 1   Cumulative CPU: 3.47 sec   HDFS Read: 27911 HDFS Write: 14622 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 470 msec
+OK
+_col0	_col1	_col2	_col3	_col4	_col5	_col6
+Time taken: 28.249 seconds
+hive (custdb)> select * from cust_payments limit 7;
+OK
+cust_payments.customernumber	cust_payments.contactfirstname	cust_payments.contactlastname	cust_payments.phone	cust_payments.creditlimit	cust_payments.paymentdate	cust_payments.amount
+103	Carine 	Schmitt	40.32.2555	21000	2016-10-19	6066.78
+103	Carine 	Schmitt	40.32.2555	21000	2016-10-05	14571.44
+103	Carine 	Schmitt	40.32.2555	21000	2016-10-18	1676.14
+112	Jean	King	7025551838	71800	2016-10-17	14191.12
+112	Jean	King	7025551838	71800	2016-10-06	32641.98
+112	Jean	King	7025551838	71800	2016-10-20	33347.88
+114	Peter	Ferguson	03 9520 4555	117300	2016-10-20	45864.03
+Time taken: 0.11 seconds, Fetched: 7 row(s)
+hive (custdb)> 
+
+
+6. Create a view called custpayments_vw to only display customernumber,creditlimit,paymentdate and
+amount selected from cust_payments.
+
+-----# Creation of view "custpayments_vw"
+create view custpayments_vw as 
+select cp.customernumber,cp.creditlimit,cp.paymentdate,cp.amount from cust_payments cp;
+
+hive (custdb)> create view custpayments_vw as 
+             > select cp.customernumber,cp.creditlimit,cp.paymentdate,cp.amount from cust_payments cp;
+OK
+customernumber	creditlimit	paymentdate	amount
+Time taken: 0.319 seconds
+hive (custdb)> show create table custpayments_vw;
+OK
+createtab_stmt
+CREATE VIEW `custpayments_vw` AS select `cp`.`customernumber`,`cp`.`creditlimit`,`cp`.`paymentdate`,`cp`.`amount` from `custdb`.`cust_payments` `cp`
+Time taken: 0.131 seconds, Fetched: 1 row(s)
+hive (custdb)> 
+
+7. Extract only customernumber,creditlimit,paymentdate and amount columns either using the above
+view/cust_payments table into hdfs location /user/hduser/custpaymentsexport with '|' delimiter.
+
+create external table custpaymentsexport (customernumber int,creditlimit string,paymentdate date,amount double)
+row format delimited fields terminated by '|'
+location '/user/hduser/custpaymentsexport';
+
+--Options:1
+
+insert overwrite local directory '/home/hduser/custpaymentsexport1'
+row format delimited fields terminated by '|'
+select * from custpayments_vw;
+
+hive (custdb)> insert overwrite local directory '/home/hduser/custpaymentsexport1'
+             > row format delimited fields terminated by '|'
+             > select * from custpayments_vw;
+Query ID = hduser_20201021203938_85824103-9851-493b-8418-8bf9471053d6
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1602787237899_0029, Tracking URL = http://Inceptez:8088/proxy/application_1602787237899_0029/
+Kill Command = /usr/local/hadoop/bin/hadoop job  -kill job_1602787237899_0029
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2020-10-21 20:39:45,992 Stage-1 map = 0%,  reduce = 0%
+2020-10-21 20:39:52,381 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.24 sec
+MapReduce Total cumulative CPU time: 2 seconds 240 msec
+Ended Job = job_1602787237899_0029
+Copying data to local directory /home/hduser/custpaymentsexport1
+Copying data to local directory /home/hduser/custpaymentsexport1
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 2.24 sec   HDFS Read: 27061 HDFS Write: 8209 SUCCESS
+Total MapReduce CPU Time Spent: 2 seconds 240 msec
+OK
+custpayments_vw.customernumber	custpayments_vw.creditlimit	custpayments_vw.paymentdate	custpayments_vw.amount
+Time taken: 14.999 seconds
+hive (custdb)>
+
+-----# Validate data on Linux and hdfs
+
+[hduser@Inceptez ~]$ pwd
+/home/hduser
+[hduser@Inceptez ~]$ cd custpaymentsexport1
+[hduser@Inceptez custpaymentsexport1]$ ls -lart
+total 24
+drwx------. 60 hduser hduser 4096 Oct 21 20:39 ..
+drwxrwxr-x   2 hduser hduser 4096 Oct 21 20:39 .
+-rw-r--r--   1 hduser hduser   76 Oct 21 20:39 .000000_0.crc
+-rw-r--r--   1 hduser hduser 8209 Oct 21 20:39 000000_0
+[hduser@Inceptez custpaymentsexport1]$ vi 000000_0
+[hduser@Inceptez custpaymentsexport1]$ pwd
+/home/hduser/custpaymentsexport1
+[hduser@Inceptez custpaymentsexport1]$ 
+[hduser@Inceptez custpaymentsexport1]$ hadoop fs -mkdir custpaymentsexport1
+20/10/21 20:43:33 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[hduser@Inceptez custpaymentsexport1]$ 
+[hduser@Inceptez custpaymentsexport1]$ hadoop fs -put /home/hduser/custpaymentsexport1/000000_0 /user/hduser/custpaymentsexport1/000000_0
+20/10/21 20:43:38 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[hduser@Inceptez custpaymentsexport1]$
+[hduser@Inceptez custpaymentsexport1]$ hadoop fs -ls /user/hduser/custpaymentsexport1/
+20/10/21 20:44:11 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 hduser hadoop       8209 2020-10-21 20:43 /user/hduser/custpaymentsexport1/000000_0
+[hduser@Inceptez custpaymentsexport1]$ hadoop fs -cat /user/hduser/custpaymentsexport1/000000_0 | head -3
+20/10/21 20:44:35 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+103|21000|2016-10-19|6066.78
+103|21000|2016-10-05|14571.44
+103|21000|2016-10-18|1676.14
+cat: Unable to write to output stream.
+[hduser@Inceptez custpaymentsexport1]$
+
+
+--Options:2
+
+hive (custdb)> create external table custpaymentsexport (customernumber int,creditlimit string,paymentdate date,amount double)
+             > row format delimited fields terminated by '|'
+             > location '/user/hduser/custpaymentsexport';
+OK
+Time taken: 0.13 seconds
+hive (custdb)>
+
+[hduser@Inceptez hiveusecase]$ hdfs dfs -ls /user/hduser/custpaymentsexport
+20/10/21 20:06:49 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[hduser@Inceptez hiveusecase]$ 
+
+hive (custdb)> insert into custpaymentsexport select * from custpayments_vw;
+Query ID = hduser_20201021200742_2709972c-c7c9-48c6-827f-c0abd1c553df
+Total jobs = 3
+Launching Job 1 out of 3
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1602787237899_0027, Tracking URL = http://Inceptez:8088/proxy/application_1602787237899_0027/
+Kill Command = /usr/local/hadoop/bin/hadoop job  -kill job_1602787237899_0027
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2020-10-21 20:07:50,090 Stage-1 map = 0%,  reduce = 0%
+2020-10-21 20:07:56,495 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.19 sec
+MapReduce Total cumulative CPU time: 2 seconds 190 msec
+Ended Job = job_1602787237899_0027
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Moving data to: hdfs://localhost:54310/user/hduser/custpaymentsexport/.hive-staging_hive_2020-10-21_20-07-42_600_8305937616887808789-1/-ext-10000
+Loading data to table custdb.custpaymentsexport
+[Error 30017]: Skipping stats aggregation by error org.apache.hadoop.hive.ql.metadata.HiveException: [Error 30001]: StatsPublisher cannot be initialized. There was a error in the initialization of StatsPublisher, and retrying might help. If you dont want the query to fail because accurate statistics could not be collected, set hive.stats.reliable=false
+Table custdb.custpaymentsexport stats: [numFiles=1, totalSize=8209]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 2.19 sec   HDFS Read: 27377 HDFS Write: 8209 SUCCESS
+Total MapReduce CPU Time Spent: 2 seconds 190 msec
+OK
+custpayments_vw.customernumber	custpayments_vw.creditlimit	custpayments_vw.paymentdate	custpayments_vw.amount
+Time taken: 16.337 seconds
+hive (custdb)> 
+
+[hduser@Inceptez hiveusecase]$ hdfs dfs -ls /user/hduser/custpaymentsexport
+20/10/21 20:08:07 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 hduser hadoop       8209 2020-10-21 20:07 /user/hduser/custpaymentsexport/000000_0
+[hduser@Inceptez hiveusecase]$ hdfs dfs -cat /user/hduser/custpaymentsexport | head -3
+20/10/21 20:08:29 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+cat: `/user/hduser/custpaymentsexport': Is a directory
+[hduser@Inceptez hiveusecase]$ hdfs dfs -cat /user/hduser/custpaymentsexport/000000_0 | head -3
+20/10/21 20:08:47 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+103|21000|2016-10-19|6066.78
+103|21000|2016-10-05|14571.44
+103|21000|2016-10-18|1676.14
+cat: Unable to write to output stream.
+[hduser@Inceptez hiveusecase]$
+
+hive (custdb)> drop table custpaymentsexport;
+OK
+Time taken: 0.157 seconds
+hive (custdb)>
+
+[hduser@Inceptez hiveusecase]$ hdfs dfs -cat /user/hduser/custpaymentsexport/000000_0 | tail -3
+20/10/21 20:09:27 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+496|110000|2016-10-25|30253.75
+496|110000|2016-10-16|32077.44
+496|110000|2016-10-31|52166.0
+[hduser@Inceptez hiveusecase]$
+
+
+8. Export the data from the /user/hduser/custpaymentsexport location to mysql table called
+cust_payments using sqoop export with staging table option using records per statement 100 and mappers 3.
+
+-----# Create target and staging table 
+CREATE TABLE cust_payments(
+  customernumber int, 
+  creditlimit decimal(10,0),
+  paymentdate date,
+  amount double );
+
+CREATE TABLE cust_payments_stage(
+  customernumber int, 
+--  contactfirstname varchar(50),  contactlastname varchar(50),   phone varchar(15), 
+  creditlimit decimal(10,0),
+  paymentdate date,
+  amount double );
+
+mysql> CREATE TABLE cust_payments(
+    ->   customernumber int, 
+    ->   creditlimit decimal(10,0),
+    ->   paymentdate date,
+    ->   amount double );
+Query OK, 0 rows affected (0.07 sec)
+
+mysql>
+
+mysql> CREATE TABLE cust_payments_stage(
+    ->   customernumber int, 
+    -> --  contactfirstname varchar(50),  contactlastname varchar(50),   phone varchar(15), 
+    ->   creditlimit decimal(10,0),
+    ->   paymentdate date,
+    ->   amount double );
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> 
+
+sqoop export -Dsqoop.export.statements.per.transaction=100 --connect jdbc:mysql://localhost/custpayments --username root --password root --export-dir /user/hduser/custpaymentsexport --table cust_payments --num-mapper 3 --input-fields-terminated-by '|' --staging-table cust_payments_stage --clear-staging-table;
+
+[hduser@Inceptez ~]$ sqoop export -Dsqoop.export.statements.per.transaction=100 --connect jdbc:mysql://localhost/custpayments --username root --password root --export-dir /user/hduser/custpaymentsexport --table cust_payments -m 3 --input-fields-terminated-by '|' --staging-table cust_payments_stage --clear-staging-table;
+Warning: /usr/local/sqoop/../hcatalog does not exist! HCatalog jobs will fail.
+Please set $HCAT_HOME to the root of your HCatalog installation.
+Warning: /usr/local/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+20/10/22 11:11:53 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6
+20/10/22 11:11:53 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+20/10/22 11:11:53 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+20/10/22 11:11:53 INFO tool.CodeGenTool: Beginning code generation
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/usr/local/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/usr/local/hbase/lib/phoenix-4.8.0-HBase-0.98-client.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/usr/local/hbase/lib/slf4j-log4j12-1.6.4.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+20/10/22 11:11:54 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `cust_payments` AS t LIMIT 1
+20/10/22 11:11:54 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `cust_payments` AS t LIMIT 1
+20/10/22 11:11:54 INFO orm.CompilationManager: HADOOP_MAPRED_HOME is /usr/local/hadoop
+Note: /tmp/sqoop-hduser/compile/107234623b4f32025d43e7f04d86c1fa/cust_payments.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+20/10/22 11:11:55 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-hduser/compile/107234623b4f32025d43e7f04d86c1fa/cust_payments.jar
+20/10/22 11:11:55 INFO mapreduce.ExportJobBase: Data will be staged in the table: cust_payments_stage
+20/10/22 11:11:55 INFO mapreduce.ExportJobBase: Beginning export of cust_payments
+20/10/22 11:11:55 INFO manager.SqlManager: Deleted 0 records from `cust_payments_stage`
+20/10/22 11:11:56 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+20/10/22 11:11:56 INFO Configuration.deprecation: mapred.jar is deprecated. Instead, use mapreduce.job.jar
+20/10/22 11:11:57 INFO Configuration.deprecation: mapred.reduce.tasks.speculative.execution is deprecated. Instead, use mapreduce.reduce.speculative
+20/10/22 11:11:57 INFO Configuration.deprecation: mapred.map.tasks.speculative.execution is deprecated. Instead, use mapreduce.map.speculative
+20/10/22 11:11:57 INFO Configuration.deprecation: mapred.map.tasks is deprecated. Instead, use mapreduce.job.maps
+20/10/22 11:11:57 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
+20/10/22 11:12:00 INFO input.FileInputFormat: Total input paths to process : 1
+20/10/22 11:12:00 INFO input.FileInputFormat: Total input paths to process : 1
+20/10/22 11:12:00 INFO mapreduce.JobSubmitter: number of splits:3
+20/10/22 11:12:00 INFO Configuration.deprecation: mapred.map.tasks.speculative.execution is deprecated. Instead, use mapreduce.map.speculative
+20/10/22 11:12:00 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1602787237899_0041
+20/10/22 11:12:01 INFO impl.YarnClientImpl: Submitted application application_1602787237899_0041
+20/10/22 11:12:01 INFO mapreduce.Job: The url to track the job: http://Inceptez:8088/proxy/application_1602787237899_0041/
+20/10/22 11:12:01 INFO mapreduce.Job: Running job: job_1602787237899_0041
+20/10/22 11:12:08 INFO mapreduce.Job: Job job_1602787237899_0041 running in uber mode : false
+20/10/22 11:12:08 INFO mapreduce.Job:  map 0% reduce 0%
+20/10/22 11:12:23 INFO ipc.Client: Retrying connect to server: Inceptez/127.0.0.1:34876. Already tried 0 time(s); retry policy is RetryUpToMaximumCountWithFixedSleep(maxRetries=3, sleepTime=1000 MILLISECONDS)
+20/10/22 11:12:24 INFO ipc.Client: Retrying connect to server: Inceptez/127.0.0.1:34876. Already tried 1 time(s); retry policy is RetryUpToMaximumCountWithFixedSleep(maxRetries=3, sleepTime=1000 MILLISECONDS)
+20/10/22 11:12:25 INFO ipc.Client: Retrying connect to server: Inceptez/127.0.0.1:34876. Already tried 2 time(s); retry policy is RetryUpToMaximumCountWithFixedSleep(maxRetries=3, sleepTime=1000 MILLISECONDS)
+20/10/22 11:12:38 INFO mapreduce.Job: Task Id : attempt_1602787237899_0041_m_000002_1000, Status : FAILED
+Error: unable to create new native thread
+20/10/22 11:12:42 INFO mapreduce.Job:  map 67% reduce 0%
+20/10/22 11:12:42 INFO mapreduce.Job: Task Id : attempt_1602787237899_0041_m_000002_1001, Status : FAILED
+Exception from container-launch.
+Container id: container_1602787237899_0041_02_000005
+Exit code: 1
+Stack trace: ExitCodeException exitCode=1: 
+	at org.apache.hadoop.util.Shell.runCommand(Shell.java:545)
+	at org.apache.hadoop.util.Shell.run(Shell.java:456)
+	at org.apache.hadoop.util.Shell$ShellCommandExecutor.execute(Shell.java:722)
+	at org.apache.hadoop.yarn.server.nodemanager.DefaultContainerExecutor.launchContainer(DefaultContainerExecutor.java:211)
+	at org.apache.hadoop.yarn.server.nodemanager.containermanager.launcher.ContainerLaunch.call(ContainerLaunch.java:302)
+	at org.apache.hadoop.yarn.server.nodemanager.containermanager.launcher.ContainerLaunch.call(ContainerLaunch.java:82)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+
+
+Container exited with a non-zero exit code 1
+
+20/10/22 11:12:49 INFO mapreduce.Job:  map 100% reduce 0%
+20/10/22 11:12:49 INFO mapreduce.Job: Job job_1602787237899_0041 completed successfully
+20/10/22 11:12:49 INFO mapreduce.Job: Counters: 32
+	File System Counters
+		FILE: Number of bytes read=0
+		FILE: Number of bytes written=400479
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+		HDFS: Number of bytes read=12818
+		HDFS: Number of bytes written=0
+		HDFS: Number of read operations=15
+		HDFS: Number of large read operations=0
+		HDFS: Number of write operations=0
+	Job Counters 
+		Failed map tasks=2
+		Launched map tasks=5
+		Other local map tasks=2
+		Data-local map tasks=3
+		Total time spent by all maps in occupied slots (ms)=30112
+		Total time spent by all reduces in occupied slots (ms)=0
+		Total time spent by all map tasks (ms)=30112
+		Total vcore-seconds taken by all map tasks=30112
+		Total megabyte-seconds taken by all map tasks=30834688
+	Map-Reduce Framework
+		Map input records=273
+		Map output records=273
+		Input split bytes=508
+		Spilled Records=0
+		Failed Shuffles=0
+		Merged Map outputs=0
+		GC time elapsed (ms)=327
+		CPU time spent (ms)=2920
+		Physical memory (bytes) snapshot=482672640
+		Virtual memory (bytes) snapshot=6249476096
+		Total committed heap usage (bytes)=312999936
+	File Input Format Counters 
+		Bytes Read=0
+	File Output Format Counters 
+		Bytes Written=0
+20/10/22 11:12:49 INFO mapreduce.ExportJobBase: Transferred 12.5176 KB in 51.8728 seconds (247.1044 bytes/sec)
+20/10/22 11:12:49 INFO mapreduce.ExportJobBase: Exported 273 records.
+20/10/22 11:12:49 INFO mapreduce.ExportJobBase: Starting to migrate data from staging table to destination.
+20/10/22 11:12:49 INFO manager.SqlManager: Migrated 273 records from `cust_payments_stage` to `cust_payments`
+[hduser@Inceptez ~]$ 
+
+-----# Validate loaded data on mysql
+mysql> select * from cust_payments where customernumber in (103,112);
++----------------+-------------+-------------+----------+
+| customernumber | creditlimit | paymentdate | amount   |
++----------------+-------------+-------------+----------+
+|            103 |       21000 | 2016-10-19  |  6066.78 |
+|            103 |       21000 | 2016-10-05  | 14571.44 |
+|            103 |       21000 | 2016-10-18  |  1676.14 |
+|            112 |       71800 | 2016-10-17  | 14191.12 |
+|            112 |       71800 | 2016-10-06  | 32641.98 |
+|            112 |       71800 | 2016-10-20  | 33347.88 |
++----------------+-------------+-------------+----------+
+6 rows in set (0.00 sec)
+
+mysql> select * from cust_payments_stage;
+Empty set (0.00 sec)
+
+mysql>
+
+-----
+
+Usecase 2:
+Managing Fixed Width Data:
+1. Copy the below fixed data into a linux file, load into a hive table called cust_fixed_raw in a column
+rawdata.
+1 Lara        chennai    55 2016-09-2110000
+2 vasudevan   banglore   43 2016-09-2390000
+3 Paul        chennai    33 2019-02-2020000
+4 David Hanna New Jersey 29 2019-04-22
+
+-----# Create table and load data on hive table
+create table cust_fixed_raw ( rawdata string)
+stored as  textfile;
+
+Load data local inpath '/home/hduser/cust_fixed_raw' into table cust_fixed_raw;
+
+hive (custdb)> create table cust_fixed_raw ( rawdata string)
+             > stored as  textfile;
+OK
+Time taken: 2.986 seconds
+hive (custdb)> show create table cust_fixed_raw;
+OK
+createtab_stmt
+CREATE TABLE `cust_fixed_raw`(
+  `rawdata` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://localhost:54310/user/hive/warehouse/custdb.db/cust_fixed_raw'
+TBLPROPERTIES (
+  'transient_lastDdlTime'='1603391732')
+Time taken: 1.011 seconds, Fetched: 12 row(s)
+hive (custdb)> Load data local inpath '/home/hduser/cust_fixed_raw' into table cust_fixed_raw;
+Loading data to table custdb.cust_fixed_raw
+Table custdb.cust_fixed_raw stats: [numFiles=1, totalSize=171]
+OK
+Time taken: 5.007 seconds
+hive (custdb)> select * from cust_fixed_raw;
+OK
+cust_fixed_raw.rawdata
+1 Lara        chennai    55 2016-09-2110000
+2 vasudevan   banglore   43 2016-09-2390000
+3 Paul        chennai    33 2019-02-2020000
+4 David Hanna New Jersey 29 2019-04-22
+Time taken: 0.858 seconds, Fetched: 4 row(s)
+hive (custdb)>
+
+-----# Validate data on hdfs
+[hduser@Inceptez ~]$ hadoop fs -ls /user/hive/warehouse/custdb.db/cust_fixed_raw
+20/10/22 11:36:50 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[hduser@Inceptez ~]$ pwd
+/home/hduser
+[hduser@Inceptez ~]$ hadoop fs -ls /user/hive/warehouse/custdb.db/cust_fixed_raw
+20/10/22 11:40:06 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 hduser supergroup        171 2020-10-22 11:39 /user/hive/warehouse/custdb.db/cust_fixed_raw/cust_fixed_raw
+[hduser@Inceptez ~]$
+
+
+
+2. Create a temporary table called cust_delimited_parsed_temp with columns such as
+id,name,city,age,dt,amt and load the cust_fixed_raw table using substr.
+for eg to select id column : select trim(substr(rawdata,1,3)) from cust_fixed_raw;
+
+-----# Create and load raw data
+
+create table cust_delimited_parsed_temp (id int,name string,city string,age tinyint,dt date,amt decimal)
+row format delimited fields terminated by ',';
+
+insert into cust_delimited_parsed_temp
+select trim(substr(rawdata,1,2)) id, trim(substr(rawdata,3,12)) name, trim(substr(rawdata,15,11)) city, trim(substr(rawdata,26,3)) age, 
+trim(substr(rawdata,29,10)) dt, trim(substr(rawdata,39,5)) amt from cust_fixed_raw;
+
+hive (custdb)> create table cust_delimited_parsed_temp (id int,name string,city string,age tinyint,dt date,amt decimal);
+OK
+Time taken: 0.236 seconds
+hive (custdb)> show create table cust_delimited_parsed_temp;
+OK
+createtab_stmt
+CREATE TABLE `cust_delimited_parsed_temp`(
+  `id` int, 
+  `name` string, 
+  `city` string, 
+  `age` tinyint, 
+  `dt` date, 
+  `amt` decimal(10,0))
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://localhost:54310/user/hive/warehouse/custdb.db/cust_delimited_parsed_temp'
+TBLPROPERTIES (
+  'transient_lastDdlTime'='1603392461')
+Time taken: 0.141 seconds, Fetched: 17 row(s)
+hive (custdb)>;
+hive (custdb)> select trim(substr(rawdata,1,2)) id, trim(substr(rawdata,3,12)) name, trim(substr(rawdata,15,11)) city, trim(substr(rawdata,26,3)) age, 
+             > trim(substr(rawdata,29,10)) dt, trim(substr(rawdata,39,5)) amt from cust_fixed_raw;
+OK
+id	name	city	age	dt	amt
+1	Lara	chennai	55	2016-09-21	10000
+2	vasudevan	banglore	43	2016-09-23	90000
+3	Paul	chennai	33	2019-02-20	20000
+4	David Hanna	New Jersey	29	2019-04-22	
+Time taken: 6.189 seconds, Fetched: 4 row(s)
+hive (custdb)> ;
+hive (custdb)> insert into cust_delimited_parsed_temp
+             > select trim(substr(rawdata,1,2)) id, trim(substr(rawdata,3,12)) name, trim(substr(rawdata,15,11)) city, trim(substr(rawdata,26,3)) age, 
+             > trim(substr(rawdata,29,10)) dt, trim(substr(rawdata,39,5)) amt from cust_fixed_raw;
+Query ID = hduser_20201022120004_9d88e72d-69bd-40f3-9332-0afc954390d8
+Total jobs = 3
+Launching Job 1 out of 3
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1602787237899_0042, Tracking URL = http://Inceptez:8088/proxy/application_1602787237899_0042/
+Kill Command = /usr/local/hadoop/bin/hadoop job  -kill job_1602787237899_0042
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2020-10-22 12:00:17,503 Stage-1 map = 0%,  reduce = 0%
+2020-10-22 12:00:24,317 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.6 sec
+MapReduce Total cumulative CPU time: 2 seconds 600 msec
+Ended Job = job_1602787237899_0042
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Moving data to: hdfs://localhost:54310/user/hive/warehouse/custdb.db/cust_delimited_parsed_temp/.hive-staging_hive_2020-10-22_12-00-04_772_3937188894731331375-1/-ext-10000
+Loading data to table custdb.cust_delimited_parsed_temp
+[Error 30017]: Skipping stats aggregation by error org.apache.hadoop.hive.ql.metadata.HiveException: [Error 30001]: StatsPublisher cannot be initialized. There was a error in the initialization of StatsPublisher, and retrying might help. If you dont want the query to fail because accurate statistics could not be collected, set hive.stats.reliable=false
+Table custdb.cust_delimited_parsed_temp stats: [numFiles=1, totalSize=153]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 2.6 sec   HDFS Read: 4842 HDFS Write: 153 SUCCESS
+Total MapReduce CPU Time Spent: 2 seconds 600 msec
+OK
+_col0	_col1	_col2	_col3	_col4	_col5
+Time taken: 21.339 seconds
+hive (custdb)> select * from cust_delimited_parsed_temp;
+OK
+cust_delimited_parsed_temp.id	cust_delimited_parsed_temp.name	cust_delimited_parsed_temp.city	cust_delimited_parsed_temp.age	cust_delimited_parsed_temp.dt	cust_delimited_parsed_temp.amt
+1	Lara	chennai	55	2016-09-21	10000
+2	vasudevan	banglore	43	2016-09-23	90000
+3	Paul	chennai	33	2019-02-20	20000
+4	David Hanna	New Jersey	29	2019-04-22	NULL
+Time taken: 0.252 seconds, Fetched: 4 row(s)
+hive (custdb)>
+
+------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------
+
+3. Export only id, dt and amt column into a mysql table cust_fixed_mysql using sqoop export.
+
+
+create external table cust_fixed_mysql_extbl1(id int, dt date, amt decimal)
+row format delimited fields terminated by ',';
+
+insert into cust_fixed_mysql_extbl1 select id, dt, amt from cust_delimited_parsed_temp;
+
+--
+create external table cust_fixed_mysql_extbl(id int, dt date, amt decimal);
+
+hive (custdb)> create external table cust_fixed_mysql_extbl(id int, dt date, amt decimal);
+OK
+Time taken: 2.312 seconds
+hive (custdb)> show create table cust_fixed_mysql_extbl;
+OK
+createtab_stmt
+CREATE EXTERNAL TABLE `cust_fixed_mysql_extbl`(
+  `id` int, 
+  `dt` date, 
+  `amt` decimal(10,0))
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://localhost:54310/user/hive/warehouse/custdb.db/cust_fixed_mysql_extbl'
+TBLPROPERTIES (
+  'transient_lastDdlTime'='1603568328')
+Time taken: 2.298 seconds, Fetched: 14 row(s)
+hive (custdb)> ;
+hive (custdb)> insert into cust_fixed_mysql_extbl select id, dt, amt from cust_delimited_parsed_temp;
+Query ID = hduser_20201024123936_8bfed04f-5517-4066-827a-d2e88271c487
+Total jobs = 3
+Launching Job 1 out of 3
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1602787237899_0055, Tracking URL = http://Inceptez:8088/proxy/application_1602787237899_0055/
+Kill Command = /usr/local/hadoop/bin/hadoop job  -kill job_1602787237899_0055
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2020-10-24 12:40:23,970 Stage-1 map = 0%,  reduce = 0%
+2020-10-24 12:40:25,404 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.91 sec
+MapReduce Total cumulative CPU time: 1 seconds 910 msec
+Ended Job = job_1602787237899_0055
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Moving data to: hdfs://localhost:54310/user/hive/warehouse/custdb.db/cust_fixed_mysql_extbl/.hive-staging_hive_2020-10-24_12-39-36_429_9200337271096815309-1/-ext-10000
+Loading data to table custdb.cust_fixed_mysql_extbl
+[Error 30017]: Skipping stats aggregation by error org.apache.hadoop.hive.ql.metadata.HiveException: [Error 30001]: StatsPublisher cannot be initialized. There was a error in the initialization of StatsPublisher, and retrying might help. If you dont want the query to fail because accurate statistics could not be collected, set hive.stats.reliable=false
+Table custdb.cust_fixed_mysql_extbl stats: [numFiles=1, totalSize=73]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 1.91 sec   HDFS Read: 4168 HDFS Write: 73 SUCCESS
+Total MapReduce CPU Time Spent: 1 seconds 910 msec
+OK
+id	dt	amt
+Time taken: 53.246 seconds
+hive (custdb)> select * from cust_fixed_mysql_extbl;
+OK
+cust_fixed_mysql_extbl.id	cust_fixed_mysql_extbl.dt	cust_fixed_mysql_extbl.amt
+1	2016-09-21	10000
+2	2016-09-23	90000
+3	2019-02-20	20000
+4	2019-04-22	NULL
+Time taken: 0.817 seconds, Fetched: 4 row(s)
+hive (custdb)> 
+
+create table cust_fixed_mysql (id int, dt date, amt decimal);
+
+mysql> create table cust_fixed_mysql (id int, dt date, amt decimal);
+Query OK, 0 rows affected (0.00 sec)
+
+mysql>
+
+hive (custdb)> show create table cust_delimited_parsed_temp;
+OK
+createtab_stmt
+CREATE TABLE `cust_delimited_parsed_temp`(
+  `id` int, 
+  `name` string, 
+  `city` string, 
+  `age` tinyint, 
+  `dt` date, 
+  `amt` decimal(10,0))
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://localhost:54310/user/hive/warehouse/custdb.db/cust_delimited_parsed_temp'
+TBLPROPERTIES (
+  'COLUMN_STATS_ACCURATE'='true', 
+  'numFiles'='1', 
+  'totalSize'='153', 
+  'transient_lastDdlTime'='1603393225')
+Time taken: 0.189 seconds, Fetched: 20 row(s)
+hive (custdb)>
+
+[hduser@Inceptez ~]$ hadoop fs -ls /user/hive/warehouse/custdb.db/cust_delimited_parsed_temp
+20/10/24 11:12:24 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 hduser supergroup        153 2020-10-22 12:00 /user/hive/warehouse/custdb.db/cust_delimited_parsed_temp/000000_0
+[hduser@Inceptez ~]$ hadoop fs -cat /user/hive/warehouse/custdb.db/cust_delimited_parsed_temp/000000_0
+20/10/24 11:12:48 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+1Larachennai552016-09-2110000
+2vasudevanbanglore432016-09-2390000
+3Paulchennai332019-02-2020000
+4David HannaNew Jersey292019-04-22\N
+[hduser@Inceptez ~]$ 
+
+Caused by: java.lang.RuntimeException: Can't parse input data: '1Larachennai552016-09-2110000'
+
+sqoop export --connect jdbc:mysql://localhost/custpayments --username root --password root --table cust_fixed_mysql \
+-m 1 --export-dir /user/hive/warehouse/custdb.db/cust_fixed_mysql_extbl1/ --direct --fields-terminated-by ','  --lines-terminated-by '\n' \
+--null-string '\\N' --null-non-string '\\N';
+
+
+/*  --------------------------------- Sample Sqoop Commands Start ------------------------------------------------------------------------------ */
+sqoop export --connect jdbc:mysql://localhost/custpayments?zeroDateTimeBehaviour=convertToNull --driver com.mysql.jdbc.Driver --username root --password root --table cust_fixed_mysql -m 1 --columns id,dt,amt --export-dir /user/hive/warehouse/custdb.db/cust_delimited_parsed_temp/  --input-fields-terminated-by ','  --lines-terminated-by '\n'
+
+sqoop export --connect jdbc:mysql://localhost/custpayments?zeroDateTimeBehaviour=convertToNull --username root --password root --table cust_fixed_mysql \
+-m 1 --export-dir /user/hive/warehouse/custdb.db/cust_fixed_mysql_extbl1/ --input-fields-terminated-by ','  --lines-terminated-by '\n';
+
+sqoop export --connect jdbc:mysql://localhost/custpayments --username root --password root --table cust_fixed_mysql \
+-m 1 --export-dir /user/hive/warehouse/custdb.db/cust_fixed_mysql_extbl1/ --fields-terminated-by ','  --lines-terminated-by '\n';
+
+sqoop export --connect jdbc:mysql://localhost/custpayments --username root --password root --table cust_fixed_mysql \
+-m 1 --export-dir /user/hive/warehouse/custdb.db/cust_fixed_mysql_extbl1/ --direct --fields-terminated-by ','  --lines-terminated-by '\n' \
+--null-string '\\N' --null-non-string '\\N';
+
+cust_fixed_mysql_extbl
+
+sqoop export --connect jdbc:mysql://localhost/custpayments?zeroDateTimeBehaviour=convertToNull --username root --password root --table cust_fixed_mysql \
+--columns id,dt,amt -m 1 --export-dir /user/hive/warehouse/custdb.db/cust_delimited_parsed_temp/  --fields-terminated-by ',' \
+ --lines-terminated-by '\n';
+
+sqoop export --connect jdbc:mysql://localhost/custpayments?zeroDateTimeBehaviour=convertToNull --driver com.mysql.jdbc.Driver --username root --password root --query 'select id,dt,amt from cust_fixed_mysql' -m 1 --export-dir /user/hive/warehouse/custdb.db/cust_delimited_parsed_temp/  --input-fields-terminated-by ','  --lines-terminated-by '\n'
+
+
+sqoop export --connect jdbc:mysql://localhost/custpayments --username root --password root --table cust_fixed_mysql --query "select id,dt,amt from cust_delimited_parsed_temp \$CONDITIONS" --input-fields-terminated-by ',' --export-dir /user/hive/warehouse/custdb.db/cust_delimited_parsed_temp/
+
+sqoop export --connect jdbc:mysql://localhost/custpayments --username root --password root --table cust_fixed_mysql --columns id,dt,amt --input-fields-terminated-by ',' --export-dir /user/hive/warehouse/custdb.db/cust_delimited_parsed_temp/
+
+hadoop fs -cat /user/hive/warehouse/custdb.db/cust_delimited_parsed_temp/000000_0
+
+sqoop eval --connect jdbc:mysql://localhost/custdb --username root --password root --query "insert into customer_hdfs as select * from customer ";
+
+sqoop eval --connect jdbc:mysql://localhost/custpayments --username root --password root --query "insert into cust_fixed_mysql as select id,dt,amt from custdb.cust_delimited_parsed_temp ";
+
+/*  --------------------------------- Sample Sqoop Commands  End------------------------------------------------------------------------------ */
+-------------------------------------------------------------------------------------------------------------------------------------------------
+
+hive (custdb)> create external table cust_fixed_mysql_extbl1(id int, dt date, amt decimal)
+             > row format delimited fields terminated by ',';
+OK
+Time taken: 0.822 seconds
+hive (custdb)> insert into cust_fixed_mysql_extbl1 select id, dt, amt from cust_delimited_parsed_temp;
+Query ID = hduser_20201024125200_52332493-1f5e-43a4-b2c9-3f637b812950
+Total jobs = 3
+Launching Job 1 out of 3
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1602787237899_0058, Tracking URL = http://Inceptez:8088/proxy/application_1602787237899_0058/
+Kill Command = /usr/local/hadoop/bin/hadoop job  -kill job_1602787237899_0058
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2020-10-24 12:52:10,955 Stage-1 map = 0%,  reduce = 0%
+2020-10-24 12:52:18,292 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.37 sec
+MapReduce Total cumulative CPU time: 2 seconds 370 msec
+Ended Job = job_1602787237899_0058
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Moving data to: hdfs://localhost:54310/user/hive/warehouse/custdb.db/cust_fixed_mysql_extbl1/.hive-staging_hive_2020-10-24_12-52-00_553_5579918522074329875-1/-ext-10000
+Loading data to table custdb.cust_fixed_mysql_extbl1
+[Error 30017]: Skipping stats aggregation by error org.apache.hadoop.hive.ql.metadata.HiveException: [Error 30001]: StatsPublisher cannot be initialized. There was a error in the initialization of StatsPublisher, and retrying might help. If you dont want the query to fail because accurate statistics could not be collected, set hive.stats.reliable=false
+Table custdb.cust_fixed_mysql_extbl1 stats: [numFiles=1, totalSize=73]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 2.37 sec   HDFS Read: 4284 HDFS Write: 73 SUCCESS
+Total MapReduce CPU Time Spent: 2 seconds 370 msec
+OK
+id	dt	amt
+Time taken: 21.665 seconds
+hive (custdb)> select * from cust_fixed_mysql_extbl1;
+OK
+cust_fixed_mysql_extbl1.id	cust_fixed_mysql_extbl1.dt	cust_fixed_mysql_extbl1.amt
+1	2016-09-21	10000
+2	2016-09-23	90000
+3	2019-02-20	20000
+4	2019-04-22	NULL
+Time taken: 0.845 seconds, Fetched: 4 row(s)
+hive (custdb)> 
+
+
+[hduser@Inceptez ~]$ sqoop export --connect jdbc:mysql://localhost/custpayments --username root --password root --table cust_fixed_mysql -m 1 --export-dir /user/hive/warehouse/custdb.db/cust_fixed_mysql_extbl1/ --direct --fields-terminated-by ','  --lines-terminated-by '\n' --null-string '\\N' --null-non-string '\\N';
+Warning: /usr/local/sqoop/../hcatalog does not exist! HCatalog jobs will fail.
+Please set $HCAT_HOME to the root of your HCatalog installation.
+Warning: /usr/local/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+20/10/24 13:11:00 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6
+20/10/24 13:11:00 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+20/10/24 13:11:00 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+20/10/24 13:11:00 INFO tool.CodeGenTool: Beginning code generation
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/usr/local/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/usr/local/hbase/lib/phoenix-4.8.0-HBase-0.98-client.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/usr/local/hbase/lib/slf4j-log4j12-1.6.4.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+20/10/24 13:11:01 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `cust_fixed_mysql` AS t LIMIT 1
+20/10/24 13:11:01 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `cust_fixed_mysql` AS t LIMIT 1
+20/10/24 13:11:01 INFO orm.CompilationManager: HADOOP_MAPRED_HOME is /usr/local/hadoop
+Note: /tmp/sqoop-hduser/compile/d2c7bc8fddd0ae1eb6c3bd3aee3aab02/cust_fixed_mysql.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+20/10/24 13:11:03 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-hduser/compile/d2c7bc8fddd0ae1eb6c3bd3aee3aab02/cust_fixed_mysql.jar
+20/10/24 13:11:03 INFO mapreduce.ExportJobBase: Beginning export of cust_fixed_mysql
+20/10/24 13:11:03 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+20/10/24 13:11:03 INFO Configuration.deprecation: mapred.jar is deprecated. Instead, use mapreduce.job.jar
+20/10/24 13:11:04 INFO Configuration.deprecation: mapred.map.tasks.speculative.execution is deprecated. Instead, use mapreduce.map.speculative
+20/10/24 13:11:04 INFO Configuration.deprecation: mapred.map.tasks is deprecated. Instead, use mapreduce.job.maps
+20/10/24 13:11:04 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
+20/10/24 13:11:07 INFO input.FileInputFormat: Total input paths to process : 1
+20/10/24 13:11:07 INFO input.FileInputFormat: Total input paths to process : 1
+20/10/24 13:11:08 INFO mapreduce.JobSubmitter: number of splits:1
+20/10/24 13:11:08 INFO Configuration.deprecation: mapred.map.tasks.speculative.execution is deprecated. Instead, use mapreduce.map.speculative
+20/10/24 13:11:08 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1602787237899_0063
+20/10/24 13:11:08 INFO impl.YarnClientImpl: Submitted application application_1602787237899_0063
+20/10/24 13:11:08 INFO mapreduce.Job: The url to track the job: http://Inceptez:8088/proxy/application_1602787237899_0063/
+20/10/24 13:11:08 INFO mapreduce.Job: Running job: job_1602787237899_0063
+20/10/24 13:11:18 INFO mapreduce.Job: Job job_1602787237899_0063 running in uber mode : false
+20/10/24 13:11:18 INFO mapreduce.Job:  map 0% reduce 0%
+20/10/24 13:11:24 INFO mapreduce.Job:  map 100% reduce 0%
+20/10/24 13:11:25 INFO mapreduce.Job: Job job_1602787237899_0063 completed successfully
+20/10/24 13:11:25 INFO mapreduce.Job: Counters: 30
+	File System Counters
+		FILE: Number of bytes read=0
+		FILE: Number of bytes written=133986
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+		HDFS: Number of bytes read=242
+		HDFS: Number of bytes written=0
+		HDFS: Number of read operations=4
+		HDFS: Number of large read operations=0
+		HDFS: Number of write operations=0
+	Job Counters 
+		Launched map tasks=1
+		Data-local map tasks=1
+		Total time spent by all maps in occupied slots (ms)=3869
+		Total time spent by all reduces in occupied slots (ms)=0
+		Total time spent by all map tasks (ms)=3869
+		Total vcore-seconds taken by all map tasks=3869
+		Total megabyte-seconds taken by all map tasks=3961856
+	Map-Reduce Framework
+		Map input records=4
+		Map output records=0
+		Input split bytes=166
+		Spilled Records=0
+		Failed Shuffles=0
+		Merged Map outputs=0
+		GC time elapsed (ms)=90
+		CPU time spent (ms)=500
+		Physical memory (bytes) snapshot=154222592
+		Virtual memory (bytes) snapshot=2075361280
+		Total committed heap usage (bytes)=109051904
+	File Input Format Counters 
+		Bytes Read=0
+	File Output Format Counters 
+		Bytes Written=0
+20/10/24 13:11:25 INFO mapreduce.ExportJobBase: Transferred 242 bytes in 20.8173 seconds (11.625 bytes/sec)
+20/10/24 13:11:25 INFO mapreduce.ExportJobBase: Exported 4 records.
+[hduser@Inceptez ~]$
+
+
+mysql> show create table  cust_fixed_mysql;
++------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Table            | Create Table                                                                                                                                                       |
++------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| cust_fixed_mysql | CREATE TABLE `cust_fixed_mysql` (
+  `id` int(11) DEFAULT NULL,
+  `dt` date DEFAULT NULL,
+  `amt` decimal(10,0) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 |
++------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (0.02 sec)
+
+mysql> describe cust_fixed_mysql;
++-------+---------------+------+-----+---------+-------+
+| Field | Type          | Null | Key | Default | Extra |
++-------+---------------+------+-----+---------+-------+
+| id    | int(11)       | YES  |     | NULL    |       |
+| dt    | date          | YES  |     | NULL    |       |
+| amt   | decimal(10,0) | YES  |     | NULL    |       |
++-------+---------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+mysql> 
+mysql> select * from cust_fixed_mysql;
++------+------------+-------+
+| id   | dt         | amt   |
++------+------------+-------+
+|    1 | 2016-09-21 | 10000 |
+|    2 | 2016-09-23 | 90000 |
+|    3 | 2019-02-20 | 20000 |
+|    4 | 2019-04-22 |  NULL |
++------+------------+-------+
+4 rows in set (0.00 sec)
+
+------------------------------------------------------------------------------------------------------
+
+4. Load only chennai data to another table called cust_parsed_orc of type orc format partitioned based on dt.
+
+create table cust_parsed_orc ( id int, name string, city string, age tinyint, amt decimal(10,0) )
+partitioned by (dt date)
+stored as ORC;
+
+hive (custdb)> create table cust_parsed_orc ( id int, name string, city string, age tinyint, amt decimal(10,0) )
+             > partitioned by (dt date)
+             > stored as ORC;
+OK
+Time taken: 0.435 seconds
+hive (custdb)> show create table cust_parsed_orc;
+OK
+createtab_stmt
+CREATE TABLE `cust_parsed_orc`(
+  `id` int, 
+  `name` string, 
+  `city` string, 
+  `age` tinyint, 
+  `amt` decimal(10,0))
+PARTITIONED BY ( 
+  `dt` date)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.ql.io.orc.OrcSerde' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat'
+LOCATION
+  'hdfs://localhost:54310/user/hive/warehouse/custdb.db/cust_parsed_orc'
+TBLPROPERTIES (
+  'transient_lastDdlTime'='1603573805')
+Time taken: 0.1 seconds, Fetched: 18 row(s)
+hive (custdb)> 
+
+hive (custdb)> insert into cust_parsed_orc partition(dt='2016-09-21') select id,name,city,age,amt from cust_delimited_parsed_temp where city='chennai' and dt='2016-09-21';
+Query ID = hduser_20201024142152_3bd43f00-c6e4-48a7-9cf8-4163009aa02f
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1602787237899_0065, Tracking URL = http://Inceptez:8088/proxy/application_1602787237899_0065/
+Kill Command = /usr/local/hadoop/bin/hadoop job  -kill job_1602787237899_0065
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2020-10-24 14:22:00,999 Stage-1 map = 0%,  reduce = 0%
+2020-10-24 14:22:09,606 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.92 sec
+MapReduce Total cumulative CPU time: 5 seconds 920 msec
+Ended Job = job_1602787237899_0065
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Moving data to: hdfs://localhost:54310/user/hive/warehouse/custdb.db/cust_parsed_orc/dt=2016-09-21/.hive-staging_hive_2020-10-24_14-21-52_499_3121499884320794443-1/-ext-10000
+Loading data to table custdb.cust_parsed_orc partition (dt=2016-09-21)
+[Error 30017]: Skipping stats aggregation by error org.apache.hadoop.hive.ql.metadata.HiveException: [Error 30001]: StatsPublisher cannot be initialized. There was a error in the initialization of StatsPublisher, and retrying might help. If you dont want the query to fail because accurate statistics could not be collected, set hive.stats.reliable=false
+Partition custdb.cust_parsed_orc{dt=2016-09-21} stats: [numFiles=1, numRows=-1, totalSize=563, rawDataSize=-1]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 5.92 sec   HDFS Read: 5133 HDFS Write: 563 SUCCESS
+Total MapReduce CPU Time Spent: 5 seconds 920 msec
+OK
+id	name	city	age	amt
+Time taken: 19.894 seconds
+hive (custdb)> select * from cust_parsed_orc;
+OK
+cust_parsed_orc.id	cust_parsed_orc.name	cust_parsed_orc.city	cust_parsed_orc.age	cust_parsed_orc.amt	cust_parsed_orc.dt
+1	Lara	chennai	55	10000	2016-09-21
+Time taken: 0.167 seconds, Fetched: 1 row(s)
+hive (custdb)>
+
+--To check partition details on hdfs
+
+[hduser@Inceptez ~]$ hadoop fs -ls /user/hive/warehouse/custdb.db/cust_parsed_orc
+20/10/24 14:20:34 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[hduser@Inceptez ~]$ hadoop fs -ls /user/hive/warehouse/custdb.db/cust_parsed_orc
+20/10/24 14:22:43 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+drwxr-xr-x   - hduser supergroup          0 2020-10-24 14:22 /user/hive/warehouse/custdb.db/cust_parsed_orc/dt=2016-09-21
+[hduser@Inceptez ~]$ hadoop fs -ls /user/hive/warehouse/custdb.db/cust_parsed_orc/dt=2016-09-21
+20/10/24 14:22:58 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 hduser supergroup        563 2020-10-24 14:22 /user/hive/warehouse/custdb.db/cust_parsed_orc/dt=2016-09-21/000000_0
+[hduser@Inceptez ~]$ hadoop fs -cat /user/hive/warehouse/custdb.db/cust_parsed_orc/dt=2016-09-21/000000_020/10/24 14:23:37 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+ORC
+P+
+
+
+ P6���be!F%>.�ĢD!0)��<�R�be!)F%.���Լ��L!C�/�+
+
+
+�3Kp���P>�+�f�YA�3!a0_�+4X? 193-3��*�b�`chennaiFp�7��@��b�``���ь`�IBL3K(�i�8+X��
+                                              `���`b�``�`�D8���X|����PT
+(*�Ş������)cH����	�I�y��F�\��@ �� T.�`X�$���,0�Q�D!R�QI��G������U�5>9?�BB(e
+                                                                                         �L��8������8�4�
+                                                                                                          
+                                                                                                           �X8�x8��8��$��<�
+>.�ĢD!0)����p�'g���%f
+�|p�yyy@�4��(��A(�����"
+                                    (X0��ORC[hduser@Inceptez ~]$ 
+[hduser@Inceptez ~]$
+
+--Insert 2nd records on cust_parsed_orc table
+
+hive (custdb)> insert into cust_parsed_orc partition(dt='2019-02-20') select id,name,city,age,amt from cust_delimited_parsed_temp where city='chennai' and dt='2019-02-20';
+Query ID = hduser_20201024142627_05a3e3fd-8201-48e8-9bc2-8243e9488160
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1602787237899_0066, Tracking URL = http://Inceptez:8088/proxy/application_1602787237899_0066/
+Kill Command = /usr/local/hadoop/bin/hadoop job  -kill job_1602787237899_0066
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2020-10-24 14:26:34,852 Stage-1 map = 0%,  reduce = 0%
+2020-10-24 14:26:43,336 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 3.67 sec
+MapReduce Total cumulative CPU time: 3 seconds 670 msec
+Ended Job = job_1602787237899_0066
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Moving data to: hdfs://localhost:54310/user/hive/warehouse/custdb.db/cust_parsed_orc/dt=2019-02-20/.hive-staging_hive_2020-10-24_14-26-27_367_6935102581507236023-1/-ext-10000
+Loading data to table custdb.cust_parsed_orc partition (dt=2019-02-20)
+[Error 30017]: Skipping stats aggregation by error org.apache.hadoop.hive.ql.metadata.HiveException: [Error 30001]: StatsPublisher cannot be initialized. There was a error in the initialization of StatsPublisher, and retrying might help. If you dont want the query to fail because accurate statistics could not be collected, set hive.stats.reliable=false
+Partition custdb.cust_parsed_orc{dt=2019-02-20} stats: [numFiles=1, numRows=-1, totalSize=563, rawDataSize=-1]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 3.67 sec   HDFS Read: 5133 HDFS Write: 563 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 670 msec
+OK
+id	name	city	age	amt
+Time taken: 17.662 seconds
+hive (custdb)> select * from cust_parsed_orc;
+OK
+cust_parsed_orc.id	cust_parsed_orc.name	cust_parsed_orc.city	cust_parsed_orc.age	cust_parsed_orc.amt	cust_parsed_orc.dt
+1	Lara	chennai	55	10000	2016-09-21
+3	Paul	chennai	33	20000	2019-02-20
+Time taken: 0.234 seconds, Fetched: 2 row(s)
+hive (custdb)>
+
+[hduser@Inceptez ~]$ hadoop fs -ls /user/hive/warehouse/custdb.db/cust_parsed_orc
+20/10/24 14:27:03 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 2 items
+drwxr-xr-x   - hduser supergroup          0 2020-10-24 14:22 /user/hive/warehouse/custdb.db/cust_parsed_orc/dt=2016-09-21
+drwxr-xr-x   - hduser supergroup          0 2020-10-24 14:26 /user/hive/warehouse/custdb.db/cust_parsed_orc/dt=2019-02-20
+[hduser@Inceptez ~]$ 
+
+
+5. Create a json table called cust_parsed_json (to load into json use the following steps).
+cd /home/hduser/hiveusecase
+wget https://repo1.maven.org/maven2/org/apache/hive/hcatalog/hive-hcatalog-core/1.2.1/hive-hcatalog-core-1.2.1.jar
+add jar /home/hduser/hiveusecase/hive-hcatalog-core-1.2.1.jar;
+create external table cust_parsed_json(id int, name string,city string, age int)
+ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
+stored as textfile
+location '/user/hduser/custjson';
+
+
+[hduser@Inceptez ~]$ cd /home/hduser/hiveusecase
+[hduser@Inceptez hiveusecase]$ 
+[hduser@Inceptez hiveusecase]$ pwd
+/home/hduser/hiveusecase
+[hduser@Inceptez hiveusecase]$ wget https://repo1.maven.org/maven2/org/apache/hive/hcatalog/hive-hcatalog-core/1.2.1/hive-hcatalog-core-1.2.1.jar
+--2020-10-24 14:31:09--  https://repo1.maven.org/maven2/org/apache/hive/hcatalog/hive-hcatalog-core/1.2.1/hive-hcatalog-core-1.2.1.jar
+Resolving repo1.maven.org... 151.101.12.209
+Connecting to repo1.maven.org|151.101.12.209|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 257277 (251K) [application/java-archive]
+Saving to: “hive-hcatalog-core-1.2.1.jar”
+
+100%[=============================================================================================================================>] 257,277     60.0K/s   in 4.2s    
+
+2020-10-24 14:31:14 (60.0 KB/s) - “hive-hcatalog-core-1.2.1.jar” saved [257277/257277]
+
+[hduser@Inceptez hiveusecase]$ add jar /home/hduser/hiveusecase/hive-hcatalog-core-1.2.1.jar;
+bash: add: command not found
+[hduser@Inceptez hiveusecase]$ ls -lart
+total 328
+-rw-rw-r--   1 hduser hduser 257277 Jun 19  2015 hive-hcatalog-core-1.2.1.jar
+-rw-rw-r--   1 hduser hduser   9219 Mar 29  2019 payments.txt
+-rw-rw-r--   1 hduser hduser  18546 Mar 29  2019 custpayments_ORIG.sql
+-rw-rw-r--   1 hduser hduser  36101 Oct 13 15:20 customers.java
+drwx------. 60 hduser hduser   4096 Oct 23 08:25 ..
+drwxrwxr-x   2 hduser hduser   4096 Oct 24 14:31 .
+[hduser@Inceptez hiveusecase]$ hadoop fs -ls /user/hduser/custjson
+20/10/24 14:36:14 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+ls: `/user/hduser/custjson': No such file or directory
+[hduser@Inceptez hiveusecase]$
+
+-- Add jar on hive shell 
+hive (custdb)> ;
+hive (custdb)> add jar /home/hduser/hiveusecase/hive-hcatalog-core-1.2.1.jar;
+Added [/home/hduser/hiveusecase/hive-hcatalog-core-1.2.1.jar] to class path
+Added resources: [/home/hduser/hiveusecase/hive-hcatalog-core-1.2.1.jar]
+hive (custdb)> create external table cust_parsed_json(id int, name string,city string, age int)
+             > ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
+             > stored as textfile
+             > location '/user/hduser/custjson';
+OK
+Time taken: 0.597 seconds
+hive (custdb)>
+
+[hduser@Inceptez hiveusecase]$ hadoop fs -ls /user/hduser/custjson
+20/10/24 14:37:02 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[hduser@Inceptez hiveusecase]$
+
+
+6. Insert into the cust_parsed_json only non chennai data using insert select of id,name,city, age from
+the cust_delimited_parsed_temp table.
+
+insert into cust_parsed_json select id,name,city, age from the cust_delimited_parsed_temp where city != 'chennai'.
+
+
+hive (custdb)> insert into cust_parsed_json select id,name,city,age from cust_delimited_parsed_temp where city!='chennai' ;
+Query ID = hduser_20201024144316_7c39463e-75a7-45cd-88cd-37606c63f0ef
+Total jobs = 3
+Launching Job 1 out of 3
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_1602787237899_0067, Tracking URL = http://Inceptez:8088/proxy/application_1602787237899_0067/
+Kill Command = /usr/local/hadoop/bin/hadoop job  -kill job_1602787237899_0067
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2020-10-24 14:43:25,886 Stage-1 map = 0%,  reduce = 0%
+2020-10-24 14:43:33,395 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 3.31 sec
+MapReduce Total cumulative CPU time: 3 seconds 310 msec
+Ended Job = job_1602787237899_0067
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Moving data to: hdfs://localhost:54310/user/hduser/custjson/.hive-staging_hive_2020-10-24_14-43-16_452_5560048807680743454-1/-ext-10000
+Loading data to table custdb.cust_parsed_json
+[Error 30017]: Skipping stats aggregation by error org.apache.hadoop.hive.ql.metadata.HiveException: [Error 30001]: StatsPublisher cannot be initialized. There was a error in the initialization of StatsPublisher, and retrying might help. If you dont want the query to fail because accurate statistics could not be collected, set hive.stats.reliable=false
+Table custdb.cust_parsed_json stats: [numFiles=1, totalSize=114]
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1   Cumulative CPU: 3.31 sec   HDFS Read: 4665 HDFS Write: 114 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 310 msec
+OK
+_col0	_col1	_col2	_col3
+Time taken: 22.376 seconds
+hive (custdb)> select * from  cust_parsed_json;
+OK
+cust_parsed_json.id	cust_parsed_json.name	cust_parsed_json.city	cust_parsed_json.age
+2	vasudevan	banglore	43
+4	David Hanna	New Jersey	29
+Time taken: 0.134 seconds, Fetched: 2 row(s)
+hive (custdb)>
+
+[hduser@Inceptez hiveusecase]$ hadoop fs -ls /user/hduser/custjson
+20/10/24 14:37:02 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[hduser@Inceptez hiveusecase]$ hadoop fs -ls /user/hduser/custjson
+20/10/24 14:45:03 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 hduser hadoop        114 2020-10-24 14:43 /user/hduser/custjson/000000_0
+[hduser@Inceptez hiveusecase]$ hadoop fs -cat /user/hduser/custjson/000000_0
+20/10/24 14:45:25 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+{"id":2,"name":"vasudevan","city":"banglore","age":43}
+{"id":4,"name":"David Hanna","city":"New Jersey","age":29}
+[hduser@Inceptez hiveusecase]$
+
+7. Schema migration:
+Convert the XML table called xml_bank created in the actual usecase to JSON data by the same way like
+step 5 using create table as select.
+For eg:
+create external table xml_json
+ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
+stored as textfile
+location '/user/hduser/custxmljson'
+as select * from xml_bank;
+
+--Create table has failed, need to check the data.
+create external table xml_json
+ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
+stored as textfile
+location '/user/hduser/custxmljson'
+as select * from retail.xml_bank;
+
+
+8. Import data from mysql directly creating static partition based on city=chennai as given below for
+additional knowledge.
+sqoop import \
+--connect jdbc:mysql://localhost:3306/custdb \
+--username root \
+--password root \
+--query "select custid,firstname,age from customer where city='chennai' and \$CONDITIONS" \
+--target-dir /user/hduser/hiveext/ \
+--split-by custid \
+--hive-overwrite \
+--hive-import \
+--create-hive-table \
+--hive-partition-key city \
+--hive-partition-value 'chennai' \
+--fields-terminated-by ',' \
+--hive-table default.custinfo \
+--direct
+
+sqoop import \
+--connect jdbc:mysql://localhost:3306/custdb \
+--username root \
+--password root \
+--query "select custid,firstname,age from customer where city='chennai' and \$CONDITIONS" \
+--target-dir /user/hduser/hiveext/ \
+--split-by custid \
+--hive-overwrite \
+--hive-import \
+--create-hive-table \
+--hive-partition-key city \
+--hive-partition-value 'chennai' \
+--fields-terminated-by ',' \
+--hive-table custdb.custinfo \
+--direct;
+
+
+[hduser@Inceptez hiveusecase]$ 
+[hduser@Inceptez hiveusecase]$ sqoop import \
+> --connect jdbc:mysql://localhost:3306/custdb \
+> --username root \
+> --password root \
+> --query "select custid,firstname,age from customer where city='chennai' and \$CONDITIONS" \
+> --target-dir /user/hduser/hiveext/ \
+> --split-by custid \
+> --hive-overwrite \
+> --hive-import \
+> --create-hive-table \
+> --hive-partition-key city \
+> --hive-partition-value 'chennai' \
+> --fields-terminated-by ',' \
+> --hive-table custdb.custinfo \
+> --direct
+Warning: /usr/local/sqoop/../hcatalog does not exist! HCatalog jobs will fail.
+Please set $HCAT_HOME to the root of your HCatalog installation.
+Warning: /usr/local/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+20/10/24 15:10:54 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6
+20/10/24 15:10:54 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+20/10/24 15:10:55 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+20/10/24 15:10:55 INFO tool.CodeGenTool: Beginning code generation
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/usr/local/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/usr/local/hbase/lib/phoenix-4.8.0-HBase-0.98-client.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/usr/local/hbase/lib/slf4j-log4j12-1.6.4.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+20/10/24 15:10:56 INFO manager.SqlManager: Executing SQL statement: select custid,firstname,age from customer where city='chennai' and  (1 = 0) 
+20/10/24 15:10:56 INFO manager.SqlManager: Executing SQL statement: select custid,firstname,age from customer where city='chennai' and  (1 = 0) 
+20/10/24 15:10:56 INFO manager.SqlManager: Executing SQL statement: select custid,firstname,age from customer where city='chennai' and  (1 = 0) 
+20/10/24 15:10:56 INFO orm.CompilationManager: HADOOP_MAPRED_HOME is /usr/local/hadoop
+Note: /tmp/sqoop-hduser/compile/35b057fa387c108b390fcd2b56987e6b/QueryResult.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+20/10/24 15:11:03 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-hduser/compile/35b057fa387c108b390fcd2b56987e6b/QueryResult.jar
+20/10/24 15:11:03 INFO mapreduce.ImportJobBase: Beginning query import.
+20/10/24 15:11:04 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+20/10/24 15:11:04 INFO Configuration.deprecation: mapred.jar is deprecated. Instead, use mapreduce.job.jar
+20/10/24 15:11:05 INFO Configuration.deprecation: mapred.map.tasks is deprecated. Instead, use mapreduce.job.maps
+20/10/24 15:11:05 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
+20/10/24 15:11:13 INFO db.DBInputFormat: Using read commited transaction isolation
+20/10/24 15:11:13 INFO db.DataDrivenDBInputFormat: BoundingValsQuery: SELECT MIN(custid), MAX(custid) FROM (select custid,firstname,age from customer where city='chennai' and  (1 = 1) ) AS t1
+20/10/24 15:11:13 INFO mapreduce.JobSubmitter: number of splits:4
+20/10/24 15:11:13 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1602787237899_0068
+20/10/24 15:11:14 INFO impl.YarnClientImpl: Submitted application application_1602787237899_0068
+20/10/24 15:11:14 INFO mapreduce.Job: The url to track the job: http://Inceptez:8088/proxy/application_1602787237899_0068/
+20/10/24 15:11:14 INFO mapreduce.Job: Running job: job_1602787237899_0068
+20/10/24 15:11:38 INFO mapreduce.Job: Job job_1602787237899_0068 running in uber mode : false
+20/10/24 15:11:38 INFO mapreduce.Job:  map 0% reduce 0%
+20/10/24 15:16:06 INFO mapreduce.Job:  map 25% reduce 0%
+20/10/24 15:16:09 INFO mapreduce.Job:  map 50% reduce 0%
+20/10/24 15:16:10 INFO mapreduce.Job:  map 75% reduce 0%
+20/10/24 15:16:11 INFO mapreduce.Job:  map 100% reduce 0%
+20/10/24 15:16:19 INFO mapreduce.Job: Job job_1602787237899_0068 completed successfully
+20/10/24 15:16:19 INFO mapreduce.Job: Counters: 30
+	File System Counters
+		FILE: Number of bytes read=0
+		FILE: Number of bytes written=534912
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+		HDFS: Number of bytes read=412
+		HDFS: Number of bytes written=55
+		HDFS: Number of read operations=16
+		HDFS: Number of large read operations=0
+		HDFS: Number of write operations=8
+	Job Counters 
+		Launched map tasks=4
+		Other local map tasks=4
+		Total time spent by all maps in occupied slots (ms)=1063120
+		Total time spent by all reduces in occupied slots (ms)=0
+		Total time spent by all map tasks (ms)=1063120
+		Total vcore-seconds taken by all map tasks=1063120
+		Total megabyte-seconds taken by all map tasks=1088634880
+	Map-Reduce Framework
+		Map input records=5
+		Map output records=5
+		Input split bytes=412
+		Spilled Records=0
+		Failed Shuffles=0
+		Merged Map outputs=0
+		GC time elapsed (ms)=70224
+		CPU time spent (ms)=38850
+		Physical memory (bytes) snapshot=635809792
+		Virtual memory (bytes) snapshot=8343035904
+		Total committed heap usage (bytes)=418906112
+	File Input Format Counters 
+		Bytes Read=0
+	File Output Format Counters 
+		Bytes Written=55
+20/10/24 15:16:19 INFO mapreduce.ImportJobBase: Transferred 55 bytes in 314.2121 seconds (0.175 bytes/sec)
+20/10/24 15:16:19 INFO mapreduce.ImportJobBase: Retrieved 5 records.
+20/10/24 15:16:19 INFO manager.SqlManager: Executing SQL statement: select custid,firstname,age from customer where city='chennai' and  (1 = 0) 
+20/10/24 15:16:19 INFO manager.SqlManager: Executing SQL statement: select custid,firstname,age from customer where city='chennai' and  (1 = 0) 
+20/10/24 15:16:19 INFO hive.HiveImport: Loading uploaded data into Hive
+20/10/24 15:16:53 INFO hive.HiveImport: 20/10/24 15:16:53 WARN conf.HiveConf: HiveConf of name hive.mapjoin.optimized.keys does not exist
+20/10/24 15:16:53 INFO hive.HiveImport: 20/10/24 15:16:53 WARN conf.HiveConf: HiveConf of name hive.optimize.multigroupby.common.distincts does not exist
+20/10/24 15:16:53 INFO hive.HiveImport: 20/10/24 15:16:53 WARN conf.HiveConf: HiveConf of name hive.mapjoin.lazy.hashtable does not exist
+20/10/24 15:16:53 INFO hive.HiveImport: 20/10/24 15:16:53 WARN conf.HiveConf: HiveConf of name hive.server2.thrift.http.min.worker.threads does not exist
+20/10/24 15:16:53 INFO hive.HiveImport: 20/10/24 15:16:53 WARN conf.HiveConf: HiveConf of name hive.server2.thrift.http.max.worker.threads does not exist
+20/10/24 15:16:53 INFO hive.HiveImport: 20/10/24 15:16:53 WARN conf.HiveConf: HiveConf of name hive.server2.logging.operation.verbose does not exist
+20/10/24 15:16:53 INFO hive.HiveImport: 
+20/10/24 15:16:53 INFO hive.HiveImport: Logging initialized using configuration in jar:file:/usr/local/hive/lib/hive-common-1.2.2.jar!/hive-log4j.properties
+20/10/24 15:16:54 INFO hive.HiveImport: SLF4J: Class path contains multiple SLF4J bindings.
+20/10/24 15:16:54 INFO hive.HiveImport: SLF4J: Found binding in [jar:file:/usr/local/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+20/10/24 15:16:54 INFO hive.HiveImport: SLF4J: Found binding in [jar:file:/usr/local/hbase/lib/phoenix-4.8.0-HBase-0.98-client.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+20/10/24 15:16:54 INFO hive.HiveImport: SLF4J: Found binding in [jar:file:/usr/local/hbase/lib/slf4j-log4j12-1.6.4.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+20/10/24 15:16:54 INFO hive.HiveImport: SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+20/10/24 15:16:54 INFO hive.HiveImport: SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+20/10/24 15:17:00 INFO hive.HiveImport: OK
+20/10/24 15:17:00 INFO hive.HiveImport: Time taken: 3.301 seconds
+20/10/24 15:17:00 INFO hive.HiveImport: Loading data to table custdb.custinfo partition (city=chennai)
+20/10/24 15:17:02 INFO hive.HiveImport: Partition custdb.custinfo{city=chennai} stats: [numFiles=4, numRows=0, totalSize=55, rawDataSize=0]
+20/10/24 15:17:03 INFO hive.HiveImport: OK
+20/10/24 15:17:03 INFO hive.HiveImport: Time taken: 3.537 seconds
+20/10/24 15:17:04 INFO hive.HiveImport: Hive import complete.
+20/10/24 15:17:04 INFO hive.HiveImport: Export directory is contains the _SUCCESS file only, removing the directory.
+[hduser@Inceptez hiveusecase]$ 
+
+hive (custdb)> select * from custinfo;
+OK
+custinfo.custid	custinfo.firstname	custinfo.age	custinfo.city
+1	Arun	33	chennai
+2	srini	33	chennai
+5	arun	23	chennai
+7	inceptez	3	chennai
+13	test	10	chennai
+Time taken: 1.05 seconds, Fetched: 5 row(s)
+hive (custdb)> show create table custinfo;
+OK
+createtab_stmt
+CREATE TABLE `custinfo`(
+  `custid` int, 
+  `firstname` string, 
+  `age` int)
+COMMENT 'Imported by sqoop on 2020/10/24 15:16:19'
+PARTITIONED BY ( 
+  `city` string)
+ROW FORMAT DELIMITED 
+  FIELDS TERMINATED BY ',' 
+  LINES TERMINATED BY '\n' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://localhost:54310/user/hive/warehouse/custdb.db/custinfo'
+TBLPROPERTIES (
+  'transient_lastDdlTime'='1603577820')
+Time taken: 0.43 seconds, Fetched: 18 row(s)
+hive (custdb)>
+
+[hduser@Inceptez hiveusecase]$ hadoop fs -ls /user/hive/warehouse/custdb.db/custinfo/
+20/10/24 15:59:36 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+drwxr-xr-x   - hduser supergroup          0 2020-10-24 15:17 /user/hive/warehouse/custdb.db/custinfo/city=chennai
+[hduser@Inceptez hiveusecase]$ hadoop fs -ls /user/hive/warehouse/custdb.db/custinfo/city=chennai
+20/10/24 15:59:50 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 4 items
+-rw-r--r--   1 hduser hadoop         21 2020-10-24 15:16 /user/hive/warehouse/custdb.db/custinfo/city=chennai/part-m-00000
+-rw-r--r--   1 hduser hadoop         10 2020-10-24 15:16 /user/hive/warehouse/custdb.db/custinfo/city=chennai/part-m-00001
+-rw-r--r--   1 hduser hadoop         13 2020-10-24 15:16 /user/hive/warehouse/custdb.db/custinfo/city=chennai/part-m-00002
+-rw-r--r--   1 hduser hadoop         11 2020-10-24 15:16 /user/hive/warehouse/custdb.db/custinfo/city=chennai/part-m-00003
+[hduser@Inceptez hiveusecase]$ hadoop fs -cat /user/hive/warehouse/custdb.db/custinfo/city=chennai/part-m-00000
+20/10/24 16:00:13 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+1,Arun,33
+2,srini,33
+[hduser@Inceptez hiveusecase]$ hadoop fs -cat /user/hive/warehouse/custdb.db/custinfo/city=chennai/part-m-00001
+20/10/24 16:00:19 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+5,arun,23
+[hduser@Inceptez hiveusecase]$ hadoop fs -cat /user/hive/warehouse/custdb.db/custinfo/city=chennai/part-m-00002
+20/10/24 16:00:25 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+7,inceptez,3
+[hduser@Inceptez hiveusecase]$ hadoop fs -cat /user/hive/warehouse/custdb.db/custinfo/city=chennai/part-m-00003
+20/10/24 16:00:30 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+13,test,10
+[hduser@Inceptez hiveusecase]$ 
+
+------------------------------------------------------------------
+CREATE TABLE cust_payments(
+  customernumber int, 
+  contactfirstname varchar(50),
+  contactlastname varchar(50), 
+  phone varchar(15), 
+  creditlimit decimal(10,0),
+  paymentdate date,
+  amount double );
+
+[hduser@Inceptez ~]$ cat >custpayextt1
+103,21000,2016-10-19,6066.78        
+103,21000,2016-10-05,14571.44
+104,22000,2019-10-12,15999,23
+^C
+[hduser@Inceptez ~]$ ls -lart | tail
+custpayext*
+103,21000,2016-10-19,6066.78        
+103,21000,2016-10-05,14571.44
+104,22000,2019-10-12,15999,23
+
+[hduser@Inceptez ~]$ hdfs dfs -put /home/hduser/custpayextt1 /user/hduser/custpayext2
+20/10/22 10:48:26 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[hduser@Inceptez ~]$ hdfs dfs -cat /user/hduser/custpayext2
+20/10/22 10:49:10 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+103,21000,2016-10-19,6066.78        
+103,21000,2016-10-05,14571.44
+104,22000,2019-10-12,15999,23
+[hduser@Inceptez ~]$
+
+sqoop export --connect jdbc:mysql://localhost/custpayments --username root --password root --export-dir /user/hduser/custpayext2 --table cust_payments -m 3   --input-fields-terminated-by '|' --columns customernumber,contactfirstname,contactlastname,phone,creditlimit,paymentdate,amount;
+
+sqoop export --connect jdbc:mysql://localhost/custpayments --username root --password root --export-dir /user/hduser/custpayext2 --table cust_payments -m 3   --input-fields-terminated-by ',' --columns customernumber,contactfirstname,contactlastname,phone,creditlimit,paymentdate,amount;
+
+sqoop export --connect jdbc:mysql://localhost/custpayments --username root --password root --table cust_payments --export-dir /user/hduser/custpayext/  -m 1   --input-fields-terminated-by ','
+
+[hduser@Inceptez install]$ tar xvzf phoenix-4.6.0-HBase-0.98-bin.tar.gz
+phoenix-4.6.0-HBase-0.98-bin/
+phoenix-4.6.0-HBase-0.98-bin/phoenix-server-4.6.0-HBase-0.98.jar
+phoenix-4.6.0-HBase-0.98-bin/phoenix-assembly-4.6.0-HBase-0.98-tests.jar
+phoenix-4.6.0-HBase-0.98-bin/phoenix-tracing-webapp-4.6.0-HBase-0.98.jar
+phoenix-4.6.0-HBase-0.98-bin/phoenix-core-4.6.0-HBase-0.98-tests.jar
+phoenix-4.6.0-HBase-0.98-bin/phoenix-4.6.0-HBase-0.98-client-minimal.jar
+^Z
+[1]+  Stopped                 tar xvzf phoenix-4.6.0-HBase-0.98-bin.tar.gz
+[hduser@Inceptez install]$
+--------------------------------------------------------------------------------------------------------------------------
+
+-- Creation of xml bank table
+
+hive (retail)> CREATE TABLE xml_bank_tmp(customer_id STRING, income BIGINT, demographics map<string,string>,
+             > financial map<string,string>)
+             > ROW FORMAT SERDE 'com.ibm.spss.hive.serde2.xml.XmlSerDe'
+             > WITH SERDEPROPERTIES (
+             > "column.xpath.customer_id"="/record/@customer_id",
+             > "column.xpath.income"="/record/income/text()",
+             > "column.xpath.demographics"="/record/demographics/*",
+             > "column.xpath.financial"="/record/financial/*"
+             > )
+             > STORED AS
+             > INPUTFORMAT 'com.ibm.spss.hive.serde2.xml.XmlInputFormat'
+             > OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat'
+             > location '/user/hduser/xmlserdebank_tmp/'
+             > TBLPROPERTIES (
+             > "xmlinput.start"="<record customer",
+             > "xmlinput.end"="</record>" );
+OK
+Time taken: 0.409 seconds
+
+[hduser@Inceptez hiveusecase]$ hadoop fs -ls /user/hduser/xmlserdebank_tmp/
+20/10/24 16:11:55 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[hduser@Inceptez hiveusecase]$ hadoop fs -mkdir /user/hduser/xmlserdebank_tmp/
+20/10/24 16:13:04 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+mkdir: `/user/hduser/xmlserdebank_tmp': File exists
+[hduser@Inceptez hiveusecase]$ hadoop fs -put /home/hduser/hive/data/bankserde.xml /user/hduser/xmlserdebank_tmp/
+20/10/24 16:13:24 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[hduser@Inceptez hiveusecase]$ hadoop fs -ls /user/hduser/xmlserdebank_tmp/
+20/10/24 16:13:30 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+-rw-r--r--   1 hduser hadoop       1493 2020-10-24 16:13 /user/hduser/xmlserdebank_tmp/bankserde.xml
+[hduser@Inceptez hiveusecase]$ hadoop fs -cat /user/hduser/xmlserdebank_tmp/bankserde.xml
+20/10/24 16:13:42 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+<record customer_id="0000-JTALA">
+        <income>200000</income>     
+        <demographics>
+            <gender>F</gender>
+            <agecat>1</agecat>
+            <edcat>1</edcat>
+            <jobcat>2</jobcat>
+            <empcat>2</empcat>
+            <retire>0</retire>
+            <jobsat>1</jobsat>
+            <marital>1</marital>
+            <spousedcat>1</spousedcat>
+            <residecat>4</residecat>
+            <homeown>0</homeown>
+            <hometype>2</hometype>
+            <addresscat>2</addresscat>
+        </demographics>
+        <financial>
+            <income>18</income>
+            <creddebt>1.003392</creddebt>
+            <othdebt>2.740608</othdebt>
+            <default>0</default>
+        </financial>
+</record>
+<record customer_id="0000-KDELL">
+        <income>10000</income>     
+        <demographics>
+            <gender>M</gender>
+            <agecat>2</agecat>
+            <edcat>1</edcat>
+            <jobcat>2</jobcat>
+            <empcat>3</empcat>
+            <retire>1</retire>
+            <jobsat>1</jobsat>
+            <marital>1</marital>
+            <spousedcat>1</spousedcat>
+            <residecat>4</residecat>
+            <homeown>0</homeown>
+            <hometype>3</hometype>
+            <addresscat>2</addresscat>
+        </demographics>
+        <financial>
+            <income>20</income>
+            <creddebt>1.002292</creddebt>
+            <othdebt>2.113208</othdebt>
+            <default>0</default>
+        </financial>
+</record>
+[hduser@Inceptez hiveusecase]$
+
+hive (retail)> select * from xml_bank_tmp;
+OK
+xml_bank_tmp.customer_id	xml_bank_tmp.income	xml_bank_tmp.demographics	xml_bank_tmp.financial
+0000-JTALA	200000	{"spousedcat":"1","empcat":"2","gender":"F","jobsat":"1","homeown":"0","edcat":"1","hometype":"2","addresscat":"2","marital":"1","jobcat":"2","retire":"0","residecat":"4","agecat":"1"}	{"income":"18","default":"0","creddebt":"1.003392","othdebt":"2.740608"}
+0000-KDELL	10000	{"spousedcat":"1","empcat":"3","gender":"M","jobsat":"1","homeown":"0","edcat":"1","hometype":"3","addresscat":"2","marital":"1","jobcat":"2","retire":"1","residecat":"4","agecat":"2"}	{"income":"20","default":"0","creddebt":"1.002292","othdebt":"2.113208"}
+Time taken: 0.284 seconds, Fetched: 2 row(s)
+hive (retail)>
+
+hive (retail)> select customer_id, demographics["spousedcat"] spousecat, demographics["gender"] gender, financial["income"] income, financial["creddebt"] creddebt from xml_bank_tmp;
+OK
+customer_id	spousecat	gender	income	creddebt
+0000-JTALA	1	F	18	1.003392
+0000-KDELL	1	M	20	1.002292
+Time taken: 0.274 seconds, Fetched: 2 row(s)
+hive (retail)> 
+
+
+create table xml_json
+ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
+--stored as textfile
+STORED AS
+INPUTFORMAT 'com.ibm.spss.hive.serde2.xml.XmlInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat'
+location '/user/hduser/custxmljson';
+
+
+create external table xml_json
+ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
+stored as textfile
+location '/user/hduser/custxmljson'
+as select * from retail.xml_bank;
+
+
+create external table xml_json(id int, name string,city string, age int)
+ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
+stored as textfile
+location '/user/hduser/custxmljson';
+
+
+as select * from xml_bank_tmp;
+
+--
+{
+"customer_id": "0000-JTALA",
+"income": "200000",
+"demographics": {
+            "gender":"F",
+            "agecat":"1",
+            "edcat":"1",
+            "jobcat":"2",
+            "empcat":"2",
+            "retire":"0",
+            "jobsat":"1",
+            "marital":"1",
+            "spousedcat":"1",
+            "residecat":"4",
+            "homeown":"0",
+            "hometype":"2",
+            "addresscat":"2"},
+"financial": {
+            "income":"18",
+            "creddebt":"1.003392",
+            "othdebt":"2.740608",
+            "default":"0"}
+}
+{
+"customer_id": "0000-KDELL",
+"income": "10000",
+"demographics": {
+            "gender":"M",
+            "agecat":"2",
+            "edcat":"1",
+            "jobcat":"2",
+            "empcat":"3",
+            "retire":"1",
+            "jobsat":"1",
+            "marital":"1",
+            "spousedcat":"1",
+            "residecat":"4",
+            "homeown":"0",
+            "hometype":"3",
+            "addresscat":"2"},
+"financial": {
+            "income":"20",
+            "creddebt":"1.002292",
+            "othdebt":"2.113208",
+            "default":"0"}
+
+}
+
+
+create external table xml_json
+ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
+stored as textfile
+location '/user/hduser/custxmljson/data'
+
